@@ -15,7 +15,7 @@
 
 ## Description
 
-This sample, sampleProgressMonitor, shows an example of how to use the progress monitor API based on sampleOnnxMNIST ([documentation](https://docs.nvidia.com/deeplearning/tensorrt/sample-support-guide/index.html#onnx_mnist_sample)).
+This sample, sampleProgressMonitor, shows an example of how to use the progress monitor API based on sampleOnnxMNIST ([documentation](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)).
 
 This sample demonstrates the usage of `IProgressMonitor` to report the status of TRT engine-building operations.
 
@@ -25,11 +25,11 @@ This sample uses a Onnx model that was trained on the [MNIST dataset](https://gi
 
 Specifically, this sample performs the following steps:
 - Performs the basic setup and initialization of TensorRT using the Onnx parser
-- [Imports a trained Onnx model using Onnx parser](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#import_onnx_c)
+- [Imports a trained Onnx model using Onnx parser](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html#import-onnx-c)
 - Preprocesses the input and stores the result in a managed buffer
 - Builds an engine using incremental progress reporting
-- [Serializes and deserializes the engines](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#serial_model_c)
-- [Uses the engines to perform inference on an input image](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#perform_inference_c)
+- [Serializes and deserializes the engines](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html#deserialize-plan-c)
+- [Uses the engines to perform inference on an input image](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html#perform-inference-c)
 
 To verify whether the engine is operating correctly, this sample picks a 28x28 image of a digit at random and runs inference on it using the engine it created. The output of the network is a probability distribution on the digit, showing which digit is likely to be that in the image.
 
@@ -161,13 +161,13 @@ The following resources provide a deeper understanding about sampleProgressMonit
 - [MNIST dataset](https://github.com/NVIDIA/DIGITS/blob/master/docs/GettingStarted.md)
 
 **Documentation**
-- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#c_topics)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 # License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 # Changelog
 

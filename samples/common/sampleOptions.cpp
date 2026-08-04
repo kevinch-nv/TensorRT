@@ -20,10 +20,12 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 #include "NvInfer.h"
@@ -363,14 +365,32 @@ bool getOption(Arguments& arguments, std::string const& option, T& value)
 template <typename T>
 bool getAndDelOption(Arguments& arguments, std::string const& option, T& value)
 {
-    bool found = getOption(arguments, option, value);
-    if (found)
+    auto [beg, end] = arguments.equal_range(option);
+    auto range = std::ranges::subrange(beg, end);
+    if (range.empty())
     {
-        auto const match = arguments.find(option);
-        arguments.erase(match);
+        return false;
     }
-
-    return found;
+    // Select the entry with the smallest position index (first on the command line).
+    auto it = std::ranges::min_element(range, {}, [](auto const& x) -> decltype(auto) { return x.second.second; });
+    value = stringToValue<T>(it->second.first);
+    if constexpr (std::is_same_v<T, bool>)
+    {
+        // Idempotent bool flags may be repeated; consume every copy so no leftover
+        // is later flagged as an unknown option.
+        if (std::distance(beg, end) > 1)
+        {
+            sample::gLogWarning << "Option '" << option << "' was specified more than once." << std::endl;
+        }
+        arguments.erase(range.begin(), range.end());
+    }
+    else
+    {
+        // Non-bool options keep the original consume-one-per-call behavior, which
+        // supports both single-use (--onnx) and repeatable (--plugins) options.
+        arguments.erase(it);
+    }
+    return true;
 }
 
 //! Check if input option exists in input arguments.
@@ -1773,7 +1793,7 @@ void InferenceOptions::parse(Arguments& arguments)
         {"lInf", AccuracyValidationAlgorithm::kLInf},
         {"cos", AccuracyValidationAlgorithm::kCosineSimilarity},
     };
-    if (!accuracyAlgorithmString.empty() && fromString.find(accuracyAlgorithmString) == fromString.end())
+    if (!accuracyAlgorithmString.empty() && !fromString.contains(accuracyAlgorithmString))
     {
         throw std::invalid_argument(std::string("Unknown accuracyAlgorithm: ") + accuracyAlgorithmString);
     }

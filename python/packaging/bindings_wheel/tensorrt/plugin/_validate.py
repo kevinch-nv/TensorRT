@@ -1,5 +1,5 @@
 #
-# SPDX-FileCopyrightText: Copyright (c) 2024-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2024-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -111,7 +111,7 @@ def _parse_register_inputs(register_func, lazy_register):
             )
 
 
-        if issubclass(param.annotation, TensorDesc):
+        if inspect.isclass(param.annotation) and issubclass(param.annotation, TensorDesc):
             if saw_first_attr:
                 raise ValueError(
                     f"TensorDescs args and attribute args cannot be interspersed. Received function with signature {sig}."
@@ -226,12 +226,12 @@ def _validate_impl(impl_func, plugin_def):
                             f"Argument for receiving output Tensor, '{name}' contains a {param.annotation}. '{name}' should be a Tuple[Tensor]."
                         )
             elif name == "stream":
-                if not issubclass(param.annotation, int):
+                if not (inspect.isclass(param.annotation) and issubclass(param.annotation, int)):
                     raise ValueError("'stream' input argument should be an int")
             elif name == "tactic":
-                if not issubclass(param.annotation, int):
+                if not (inspect.isclass(param.annotation) and issubclass(param.annotation, int)):
                     raise ValueError("'tactic' input argument should be an int")
-            elif issubclass(param.annotation, Tensor):
+            elif inspect.isclass(param.annotation) and issubclass(param.annotation, Tensor):
                 if name not in plugin_def.input_tensor_names:
                     raise ValueError(
                         f"Unexpected tensor '{name}' specified in autotune function. Expected one of {plugin_def.input_tensor_names}."
@@ -300,9 +300,9 @@ def _validate_aot_impl(aot_impl_func, plugin_def):
                             f"Argument for receiving output TensorDesc, '{name}' contains a {param.annotation}. '{name}' should be a Tuple[TensorDesc]."
                         )
             elif name == "tactic":
-                if not issubclass(param.annotation, int):
+                if not (inspect.isclass(param.annotation) and issubclass(param.annotation, int)):
                     raise ValueError("'tactic' input argument should be an int")
-            elif issubclass(param.annotation, TensorDesc):
+            elif inspect.isclass(param.annotation) and issubclass(param.annotation, TensorDesc):
                 if name not in plugin_def.input_tensor_names:
                     raise ValueError(
                         f"Unexpected tensor '{name}' specified in autotune function. Expected one of {plugin_def.input_tensor_names}."
@@ -415,7 +415,7 @@ def _validate_autotune(autotune_func, plugin_def):
                         raise ValueError(
                             f"Argument for receiving output TensorDescs, '{name}' contains a {param.annotation}. '{name}' should be a Tuple[TensorDesc]."
                         )
-            elif issubclass(param.annotation, TensorDesc):
+            elif inspect.isclass(param.annotation) and issubclass(param.annotation, TensorDesc):
                 if name not in plugin_def.input_tensor_names:
                     raise ValueError(
                         f"Unexpected tensor '{name}' specified in autotune function. Expected one of {plugin_def.input_tensor_names}."

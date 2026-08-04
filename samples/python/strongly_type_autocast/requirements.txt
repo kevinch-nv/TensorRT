@@ -2,8 +2,11 @@
 --extra-index-url https://pypi.org/simple
 Pillow==11.3.0
 torch==2.8.0
-nvidia-modelopt[onnx]==0.35.0
+nvidia-modelopt[onnx]==0.35.0; python_version<"3.13"
+nvidia-modelopt[onnx]>=0.43; python_version>="3.13"
+ml_dtypes>=0.5.1; python_version>="3.13"
 pyyaml==6.0.3
 requests==2.32.4
 tqdm==4.66.4
-numpy==1.26.4
+numpy==1.26.4; python_version<"3.13"
+numpy==2.2.3; python_version>="3.13"

@@ -21,26 +21,39 @@ endif()
 
 include(InstallImportedLibraries)
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/modules/FindNCCL.cmake" OR NOT DEFINED NCCL_LIB_DIRS)
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/modules/FindNCCL.cmake")
     return()
 endif()
 
-find_package(NCCL REQUIRED)
+# On Linux, NCCL is a build-time conan dep and gets linked + bundled with
+# libnvinfer. On Windows it is not a build-time dep (the Windows nccl conan
+# package's package_id resolution fights with the build profile's cuda
+# override), so the sample uses LoadLibrary at runtime and nccl.dll is
+# fetched at test time via test_deps.py.
+if(NOT WIN32 AND NOT DEFINED NCCL_LIB_DIRS)
+    return()
+endif()
+
+if(NOT WIN32)
+    find_package(NCCL REQUIRED)
+endif()
 
 add_executable(sample_dist_collective
     sampleDistCollective.cpp
 )
 
-installImportedLibraries(
-    TARGETS NCCL::nccl
-    COMPONENT internal
-)
+if(NOT WIN32)
+    installImportedLibraries(
+        TARGETS NCCL::nccl
+        COMPONENT internal
+    )
+endif()
 
 target_link_libraries(sample_dist_collective PRIVATE
     trt_samples_common
     TRT_SAMPLES::tensorrt
-    NCCL::nccl
-    dl # For dlopen/dlsym
+    $<$<NOT:$<PLATFORM_ID:Windows>>:NCCL::nccl>
+    $<$<NOT:$<PLATFORM_ID:Windows>>:dl>
 )
 add_dependencies(tensorrt_samples sample_dist_collective)
 

@@ -54,10 +54,14 @@ function(processWheelTemplates wheelType moduleName pyVersion)
             set(__outputFile ${outputDir}/${filePath})
         endif()
 
-        flagToInt(TRT_BUILD_WINML)
+        flagToInt(TRT_PRODUCT_IS_RTX)
 
         add_custom_command(
             OUTPUT ${__outputFile}
+            # Make (unlike Ninja) doesn't create the custom-command output dir, and
+            # __outDir contains $<CONFIG>, so create it here at build time (where the
+            # generator expression resolves) rather than in the Python script.
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${__outDir}
             COMMAND
                 ${Python3_EXECUTABLE} ${TensorRT_SOURCE_DIR}/python/scripts/process_wheel_template.py
                 --src-dir ${__srcDir}
@@ -67,7 +71,7 @@ function(processWheelTemplates wheelType moduleName pyVersion)
                 --trt-py-version ${TensorRT_PACKAGE_VERSION}
                 --cuda-version ${TRT_CUDA_VERSION}
                 --trt-version ${TensorRT_VERSION}
-                --plugin-disabled ${TRT_BUILD_WINML_INT}
+                --plugin-disabled ${TRT_PRODUCT_IS_RTX_INT}
                 --trt-nvinfer-name ${TENSORRT_BASE_NAME}
                 --trt-onnxparser-name ${TRT_ONNXPARSER_NAME} # The TRT_ONNXPARSER_NAME var is populated in the root CMakeLists.txt
             DEPENDS
@@ -163,6 +167,3 @@ function(get_wheel_platform isStandalone outVar)
 endfunction()
 
 add_subdirectory(bindings_wheel)
-add_subdirectory(libs_wheel)
-add_subdirectory(frontend_sdist)
-add_subdirectory(metapackage)

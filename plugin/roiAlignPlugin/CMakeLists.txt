@@ -28,7 +28,7 @@ add_vc_plugin_source(
     roiAlignPlugin.h
 )
 
-if(NOT ${TRT_BUILD_WINML})
+if(NOT ${TRT_PRODUCT_IS_RTX})
     add_plugin_source(
         roiAlignPluginLegacy.cpp
         roiAlignPluginLegacy.h

@@ -79,13 +79,13 @@ The following resources provide a deeper understanding about this sample:
 - [MNIST](https://keras.io/datasets/#mnist-database-of-handwritten-digits)
 
 **Documentation**
-- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#c_topics)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 ## License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 
 ## Changelog

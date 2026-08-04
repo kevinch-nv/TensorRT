@@ -1,0 +1,117 @@
+#
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+---
+name: FFTPlugin
+interface: "IPluginV3"
+versions:
+  "1":
+    inputs:
+      - input
+    supported_input_types:
+      - combination1:
+          input: float32
+      - combination2:
+          input: float16
+      - combination3:
+          input: bfloat16
+    configs:
+      config1:
+        input_types:
+          input: float32
+        attribute_options:
+          inverse:
+            - 0
+          onesided:
+            - 0
+          ndims:
+            - 1
+      config2:
+        input_types:
+          input: float16
+        attribute_options:
+          inverse:
+            - 0
+          onesided:
+            - 0
+          ndims:
+            - 1
+      config3:
+        input_types:
+          input: bfloat16
+        attribute_options:
+          inverse:
+            - 0
+          onesided:
+            - 0
+          ndims:
+            - 1
+      config4:
+        input_types:
+          input: float32
+        attribute_options:
+          inverse:
+            - 1
+          onesided:
+            - 0
+          ndims:
+            - 1
+      config5:
+        input_types:
+          input: float32
+        attribute_options:
+          inverse:
+            - 0
+          onesided:
+            - 1
+          ndims:
+            - 1
+    outputs:
+      - output
+    attributes:
+      - inverse
+      - onesided
+      - ndims
+    attribute_types:
+      inverse: int32
+      onesided: int32
+      ndims: int32
+    attribute_length:
+      inverse: 1
+      onesided: 1
+      ndims: 1
+    attribute_options:
+      inverse:
+        - 0
+        - 1
+      onesided:
+        - 0
+        - 1
+      ndims:
+        - 1
+        - 2
+        - 3
+    attributes_required:
+      - ndims
+    golden_io_path: "plugin/FFTPlugin_PluginGoldenIO.json"
+    abs_tol: 1e-2
+    rel_tol: 1e-2
+    bf16_rtol: 5e-2
+    bf16_atol: 5e-2
+    fp16_rtol: 5e-2
+    fp16_atol: 5e-2
+...

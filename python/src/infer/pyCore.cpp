@@ -186,10 +186,15 @@ static auto const engine_getitem = [](ICudaEngine& self, int32_t pyIndex) {
 
 std::vector<Dims> get_tensor_profile_shape(ICudaEngine& self, std::string const& tensorName, int32_t profileIndex)
 {
+    std::string const errorMsg{"Could not get profile shape for tensor '" + tensorName
+        + "'. Is the tensor name an input and the profile index valid?"};
     std::vector<Dims> shapes{};
-    shapes.emplace_back(self.getProfileShape(tensorName.c_str(), profileIndex, OptProfileSelector::kMIN));
-    shapes.emplace_back(self.getProfileShape(tensorName.c_str(), profileIndex, OptProfileSelector::kOPT));
-    shapes.emplace_back(self.getProfileShape(tensorName.c_str(), profileIndex, OptProfileSelector::kMAX));
+    shapes.emplace_back(
+        utils::checkDims(self.getProfileShape(tensorName.c_str(), profileIndex, OptProfileSelector::kMIN), errorMsg));
+    shapes.emplace_back(
+        utils::checkDims(self.getProfileShape(tensorName.c_str(), profileIndex, OptProfileSelector::kOPT), errorMsg));
+    shapes.emplace_back(
+        utils::checkDims(self.getProfileShape(tensorName.c_str(), profileIndex, OptProfileSelector::kMAX), errorMsg));
     return shapes;
 }
 
@@ -285,6 +290,7 @@ static auto const get_remote_auto_tuning_config
 
 static auto const set_remote_auto_tuning_config
     = [](IBuilderConfig& self, std::string const& config) { self.setRemoteAutoTuningConfig(config.c_str()); };
+
 
 static auto const get_build_route = [](IBuilderConfig& self) { return std::string{self.getBuildRoute()}; };
 
@@ -548,7 +554,7 @@ public:
     {
         intptr_t cudaStreamPtr = reinterpret_cast<intptr_t>(stream);
         return PyGpuAllocatorHelper::allocHelper<IGpuAsyncAllocator>(
-            this, "allocate_async", true, size, alignment, cudaStreamPtr, flags);
+            this, "allocate_async", true, size, alignment, flags, cudaStreamPtr);
     }
 
     void* reallocate(void* baseAddr, uint64_t alignment, uint64_t newSize) noexcept override
@@ -1304,15 +1310,22 @@ void bindCore(py::module& m)
             IExecutionContextDoc::update_device_memory_size_for_shapes)
         .def_property_readonly("active_optimization_profile", &IExecutionContext::getOptimizationProfile)
         // Start of enqueueV3 related APIs.
-        .def("get_tensor_strides", &IExecutionContext::getTensorStrides, "name"_a,
-            IExecutionContextDoc::get_tensor_strides)
+        .def(
+            "get_tensor_strides",
+            [](IExecutionContext& self, char const* name) {
+                return utils::checkDims(self.getTensorStrides(name),
+                    "Could not get strides for tensor '" + std::string{name}
+                        + "'. Check that the tensor name is correct and that all dynamic input shapes have been set.");
+            },
+            "name"_a, IExecutionContextDoc::get_tensor_strides)
         .def("set_input_shape", lambdas::setInputShape<py::tuple>, "name"_a, "shape"_a,
             IExecutionContextDoc::set_input_shape)
         .def("set_input_shape", lambdas::setInputShape<py::list>, "name"_a, "shape"_a,
             IExecutionContextDoc::set_input_shape)
         .def("set_input_shape", &IExecutionContext::setInputShape, "name"_a, "shape"_a,
             IExecutionContextDoc::set_input_shape)
-        .def("get_tensor_shape", &IExecutionContext::getTensorShape, "name"_a, IExecutionContextDoc::get_tensor_shape)
+        .def("get_tensor_shape", utils::throwingNamedDimsGetter(&IExecutionContext::getTensorShape, "shape"), "name"_a,
+            IExecutionContextDoc::get_tensor_shape)
         .def("set_tensor_address", lambdas::set_tensor_address, "name"_a, "memory"_a,
             IExecutionContextDoc::set_tensor_address)
         .def("get_tensor_address", lambdas::get_tensor_address, "name"_a, IExecutionContextDoc::get_tensor_address)
@@ -1435,7 +1448,8 @@ void bindCore(py::module& m)
         .def("get_tensor_name", &ICudaEngine::getIOTensorName, "index"_a, ICudaEngineDoc::get_tensor_name)
         .def("get_tensor_mode", &ICudaEngine::getTensorIOMode, "name"_a, ICudaEngineDoc::get_tensor_mode)
         .def("is_shape_inference_io", &ICudaEngine::isShapeInferenceIO, "name"_a, ICudaEngineDoc::is_shape_inference_io)
-        .def("get_tensor_shape", &ICudaEngine::getTensorShape, "name"_a, ICudaEngineDoc::get_tensor_shape)
+        .def("get_tensor_shape", utils::throwingNamedDimsGetter(&ICudaEngine::getTensorShape, "shape"), "name"_a,
+            ICudaEngineDoc::get_tensor_shape)
         .def("get_tensor_dtype", &ICudaEngine::getTensorDataType, "name"_a, ICudaEngineDoc::get_tensor_dtype)
         .def("get_tensor_location", &ICudaEngine::getTensorLocation, "name"_a, ICudaEngineDoc::get_tensor_location)
 
@@ -1536,11 +1550,11 @@ void bindCore(py::module& m)
             ICudaEngineDoc::get_weight_streaming_automatic_budget)
         .def_property_readonly(
             "weight_streaming_scratch_memory_size", &ICudaEngine::getWeightStreamingScratchMemorySize)
-        // End weight streaming APIs
+    // End weight streaming APIs
         .def("is_debug_tensor", &ICudaEngine::isDebugTensor, "name"_a, ICudaEngineDoc::is_debug_tensor)
         .def("create_execution_context", py::overload_cast<IRuntimeConfig*>(&ICudaEngine::createExecutionContext),
             ICudaEngineDoc::create_execution_context, py::arg("runtime_config") = nullptr, py::keep_alive<0, 1>{},
-            py::call_guard<py::gil_scoped_release>{})
+            py::keep_alive<0, 2>{}, py::call_guard<py::gil_scoped_release>{})
         .def("create_runtime_config", &ICudaEngine::createRuntimeConfig, ICudaEngineDoc::create_runtime_config,
             py::call_guard<py::gil_scoped_release>{})
         .def("get_engine_stat", &ICudaEngine::getEngineStat, ICudaEngineDoc::get_engine_stat,
@@ -1668,6 +1682,7 @@ void bindCore(py::module& m)
         .value("EDGE_MASK_CONVOLUTIONS", TacticSource::kEDGE_MASK_CONVOLUTIONS, TacticSourceDoc::EDGE_MASK_CONVOLUTIONS)
         .value("JIT_CONVOLUTIONS", TacticSource::kJIT_CONVOLUTIONS, TacticSourceDoc::JIT_CONVOLUTIONS);
 
+
     py::class_<TimingCacheKey>(m, "TimingCacheKey", TimingCacheKeyDoc::descr, py::module_local())
         .def_static("parse", &lambdas::parseTimingCacheKey, "text"_a, TimingCacheKeyDoc::parse)
         .def("__str__", &lambdas::convertTimingCacheKeyToString, TimingCacheKeyDoc::convertTimingCacheKeyToString);
@@ -1704,6 +1719,7 @@ void bindCore(py::module& m)
         .value("FULL", TilingOptimizationLevel::kFULL, TilingOptimizationLevelDoc::FULL);
 
 #if EXPORT_ALL_BINDINGS
+
     py::class_<IBuilderConfig>(m, "IBuilderConfig", IBuilderConfigDoc::descr, py::module_local())
         .def_property(
             "avg_timing_iterations", &IBuilderConfig::getAvgTimingIterations, &IBuilderConfig::setAvgTimingIterations)

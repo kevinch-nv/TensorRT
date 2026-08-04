@@ -45,7 +45,7 @@ endif()
 
 # Change the file name if TRT_WINML variable is set
 set(sample_name "trtexec")
-if (${TRT_BUILD_WINML})
+if (${TRT_PRODUCT_IS_RTX})
     set(sample_name "tensorrt_rtx")
 endif()
 
@@ -80,3 +80,16 @@ if(${TRT_BUILD_TRTEXEC_STATIC})
     endif()
 endif()
 
+# In this mode, we build an additional binary tensorrt_rtx_internal with additional macro.
+if(TRT_BUILD_WINML_PLUGIN)
+    set(internal_sample_name "tensorrt_rtx_internal")
+    add_executable(${internal_sample_name} trtexec_main.cpp trtexec.cpp)
+    target_link_libraries(${internal_sample_name} PRIVATE trt_samples_common)
+    target_compile_definitions(${internal_sample_name} PRIVATE TRT_WINML_PLUGIN=1)
+
+    installLibraries(
+        TARGETS ${internal_sample_name}
+        OPTIONAL
+        COMPONENT internal
+    )
+endif()

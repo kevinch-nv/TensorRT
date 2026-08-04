@@ -1267,6 +1267,7 @@ public:
     virtual bool update(TimingCacheKey const& key, TimingCacheValue const& value) noexcept = 0;
 };
 
+
 class VBuilderConfig : public VRoot
 {
 public:

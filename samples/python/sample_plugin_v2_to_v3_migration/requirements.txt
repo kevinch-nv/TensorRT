@@ -1,0 +1,10 @@
+cuda-python==12.9.0
+cupy-cuda12x
+--extra-index-url https://pypi.ngc.nvidia.com
+polygraphy
+colored
+numpy==1.26.4
+pywin32; platform_system == "Windows"
+pyyaml==6.0.3
+requests==2.33.0
+tqdm==4.66.4

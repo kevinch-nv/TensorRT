@@ -86,7 +86,7 @@ using sample::gLogWarning;
             return "Short name '" + std::to_string(opt.shortName) + "' is non-alphanumeric";
         }
 
-        if (seenShortNames.count(opt.shortName) != 0)
+        if (seenShortNames.contains(opt.shortName))
         {
             return "Short name '" + std::to_string(opt.shortName) + "' is a duplicate";
         }
@@ -102,7 +102,7 @@ using sample::gLogWarning;
             }
         }
 
-        if (seenLongNames.count(opt.longName) != 0)
+        if (seenLongNames.contains(opt.longName))
         {
             return "Long name '" + opt.longName + "' is a duplicate";
         }

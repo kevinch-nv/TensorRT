@@ -139,11 +139,14 @@ option(BUILD_PLUGINS "Build TensorRT plugin" ON)
 option(BUILD_PARSERS "Build TensorRT parsers" ON)
 option(BUILD_SAMPLES "Build TensorRT samples" ON)
 option(BUILD_SAFE_SAMPLES "Build TensorRT safety samples" OFF)
+option(BUILD_PYTHON "Build TensorRT python bindings" OFF)
 option(TRT_SAFETY_INFERENCE_ONLY "Build only the safety inference components (no safety builders)" OFF)
 option(TRT_BUILD_TESTING "Build gtests for TensorRT components" OFF)
 
 # Must be set before add_subdirectory(plugin); the option() below is gated on BUILD_SAMPLES.
 set(TRT_BUILD_WINML OFF)
+
+set(TRT_PRODUCT_IS_RTX OFF CACHE INTERNAL "") # TRT-OSS doesn't support TensorRT-RTX
 
 ############################################################################################
 # Early dependency discovery
@@ -349,7 +352,16 @@ else()
 endif()
 
 find_library_create_target(nvinfer ${nvinfer_lib_name} SHARED "${TRT_LIB_DIR}")
-set_property(TARGET nvinfer PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${TRT_INCLUDE_DIR})
+# Include the OSS repo headers before the package headers so that impl/ headers
+# checked into the repo (e.g. impl/NvInferPythonPlugin.h) take precedence over
+# any same-named impl/ files in the downloaded package, which may differ.
+set_property(TARGET nvinfer PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${TRT_INCLUDE_DIR}")
+
+if(CMAKE_CROSSCOMPILING)
+    target_link_options(nvinfer INTERFACE "LINKER:--unresolved-symbols=ignore-in-shared-libs")
+endif()
 
 # tensorrt is aliased downstream; CMake forbids aliasing an alias.
 add_library(tensorrt INTERFACE IMPORTED)
@@ -378,6 +390,7 @@ set(HINT_PATHS "${TRT_OUT_DIR}" "${TRT_LIB_DIR}")
 if(NOT TARGET trt_global_definitions)
     add_library(trt_global_definitions INTERFACE)
     target_include_directories(trt_global_definitions INTERFACE ${CUDAToolkit_INCLUDE_DIRS})
+    target_compile_definitions(trt_global_definitions INTERFACE TRT_BUILD_ONNX_PARSER=1)
 endif()
 
 if(BUILD_PLUGINS)
@@ -398,6 +411,58 @@ endif()
 
 add_library(tensorrt_headers INTERFACE)
 target_include_directories(tensorrt_headers INTERFACE ${TRT_INCLUDE_DIR})
+
+# Python bindings
+if(BUILD_PYTHON)
+    include(FetchContent)
+    include(Platforms)
+
+    # nvonnxparser is always defined (built or imported), regardless of BUILD_PARSERS.
+    set(TRT_BUILD_ONNX_PARSER ON)
+    set(TRT_BUILD_PLUGINS ${BUILD_PLUGINS})
+
+    if(NOT DEFINED TRT_BUILD_PLATFORM)
+        set(TRT_BUILD_PLATFORM ${CMAKE_SYSTEM_PROCESSOR})
+    endif()
+
+    # Default to bindings for just the interpreter's Python version; callers
+    # can still expand by passing -DTRT_BUILD_PYTHON_PY_VERSIONS=...
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    set(TRT_BUILD_PYTHON_PY_VERSIONS "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}"
+        CACHE STRING "The list of python versions to build TensorRT bindings for.")
+
+    # The lean / dispatch bindings link the prebuilt runtime libs. Import them as
+    # targets the same way nvinfer is imported above so they are always in-graph.
+    if(MSVC)
+        set(nvinfer_lean_lib_name "nvinfer_lean_${TRT_SOVERSION}${TRT_LIB_SUFFIX}")
+        set(nvinfer_dispatch_lib_name "nvinfer_dispatch_${TRT_SOVERSION}${TRT_LIB_SUFFIX}")
+    else()
+        set(nvinfer_lean_lib_name "nvinfer_lean")
+        set(nvinfer_dispatch_lib_name "nvinfer_dispatch")
+    endif()
+    find_library_create_target(tensorrt_lean_runtime ${nvinfer_lean_lib_name} SHARED "${TRT_LIB_DIR}")
+    set_property(TARGET tensorrt_lean_runtime PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${TRT_INCLUDE_DIR}")
+    find_library_create_target(tensorrt_dispatch_runtime ${nvinfer_dispatch_lib_name} SHARED "${TRT_LIB_DIR}")
+    set_property(TARGET tensorrt_dispatch_runtime PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${TRT_INCLUDE_DIR}")
+
+    # OSS uses the system Python headers (the Debian/Ubuntu python<ver>-dev layout).
+    set(TRT_BUILD_PYTHON_EXTERNALS_PATH "/usr/include" CACHE PATH
+        "Path to the parent folder of the versioned python headers/libs.")
+
+    # Variables consumed by python/packaging when building the bindings wheel.
+    # (TensorRT_VERSION / TensorRT_SOURCE_DIR are provided by project(TensorRT VERSION ...).)
+    string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} TRT_LOWERCASE_CMAKE_SYSTEM_PROCESSOR)
+    set(TENSORRT_BASE_NAME "nvinfer")
+    set(TRT_CUDA_VERSION "${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}")
+    set(TensorRT_PACKAGE_VERSION "${TRT_VERSION}.${TRT_BUILD}")
+    set(TRT_BUILD_PYTHON_STANDALONE_WHEELS OFF)
+
+    add_subdirectory(python)
+endif()
 
 # Samples
 if(BUILD_SAMPLES OR BUILD_SAFE_SAMPLES)

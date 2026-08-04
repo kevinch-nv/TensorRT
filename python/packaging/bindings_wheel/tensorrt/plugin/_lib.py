@@ -276,7 +276,10 @@ class _TemplatePluginCreator(trt.IPluginCreatorV3Quick):
                 if issubclass(attr_type_annot, str):
                     attrs[f.name] = f.data.tobytes().decode("utf-8")
                 else:
-                    attrs[f.name] = attr_type_annot(f.data)
+                    if isinstance(f.data, np.ndarray) and f.data.size == 1:
+                        attrs[f.name] = attr_type_annot(f.data[0])
+                    else:
+                        attrs[f.name] = attr_type_annot(f.data)
 
         jit_or_aot = None # True if JIT is to be created, False if AOT. Not None will be asserted before plugin creation.
 

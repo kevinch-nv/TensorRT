@@ -24,6 +24,7 @@ set(CCCL_TAG "v3.4.0-rc0" CACHE STRING "The commit hash to FetchContent_Declare 
 # We use this directory to ensure we only fetch a single copy of dependencies, even between builds.
 # $HOME/storage is expected to be mounted from the host for developers.
 set(TRT_THIRD_PARTY_DL_DIR "$ENV{HOME}/storage" CACHE PATH "Directory to download third party dependencies to")
+file(TO_CMAKE_PATH "${TRT_THIRD_PARTY_DL_DIR}" TRT_THIRD_PARTY_DL_DIR)
 
 FetchContent_Declare(
     cccl

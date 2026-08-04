@@ -3904,7 +3904,7 @@ enum class InterpolationMode : int32_t
 {
     kNEAREST = 0, //!< ND (0 < N <= 8) nearest neighbor resizing.
     kLINEAR = 1,  //!< Supports linear (1D), bilinear (2D), and trilinear (3D) interpolation
-    kCUBIC = 2    //!< Supports bicubic (2D) interpolation
+    kCUBIC = 2    //!< Supports bicubic (2D) and tricubic (3D) interpolation
 };
 
 //!
@@ -6072,7 +6072,7 @@ inline IOneHotLayer::~IOneHotLayer() noexcept = default;
 //! \brief A GridSample layer in a network definition.
 //!
 //! This layer uses an input tensor and a grid tensor to produce an interpolated output tensor.
-//! The input and grid tensors must be shape tensors of rank 4. The only supported SampleMode
+//! The input and grid tensors must be tensors of rank 4 or 5. The only supported SampleMode
 //! values are SampleMode::kCLAMP, SampleMode::kFILL, and SampleMode::kREFLECT.
 //!
 //! \warning Do not inherit from this class, as doing so will break forward-compatibility of the API and ABI.
@@ -9482,7 +9482,7 @@ public:
     //! \see IGridSampleLayer
     //!
     //! Creates a GridSample layer with a InterpolationMode::kLINEAR, unaligned corners,
-    //! and SampleMode::kFILL for 4d-shape input tensors.
+    //! and SampleMode::kFILL for rank 4 or 5 input tensors.
     //!
     //! \return The new GridSample layer, or nullptr if it could not be created.
     //!
@@ -9940,6 +9940,7 @@ struct impl::EnumMaxImpl<RuntimePlatform>
     static constexpr int32_t kVALUE = 2;
 };
 
+
 //!
 //! \brief Represents one or more BuilderFlag values using binary OR
 //! operations, e.g., 1U << BuilderFlag::kDEBUG.
@@ -10023,7 +10024,10 @@ enum class BuilderFlag : int32_t
     //! BuilderFlag::DISABLE_TIMING_CACHE is not set.
     kDISABLE_COMPILATION_CACHE = 17,
 
-    //! Strip the refittable weights from the engine plan file.
+    //! Strip refittable weights from the engine plan file. If no refit mode is specified, kREFIT_IDENTICAL is enabled
+    //! by default. When used with kREFIT_INDIVIDUAL, only weights explicitly marked with
+    //! INetworkDefinition::markWeightsRefittable are stripped. When used with kREFIT or kREFIT_IDENTICAL, TensorRT
+    //! determines which refittable weights are stripped according to the selected refit mode.
     kSTRIP_PLAN = 18,
 
     //! Create a refittable engine under the assumption that the refit weights will be identical to those provided at
@@ -10096,6 +10100,7 @@ enum class BuilderFlag : int32_t
     //! For layers that perform einsum:
     //! Let n be the leftmost reduction axis. The axes to the left of n are distributive axes.
     kDISTRIBUTIVE_INDEPENDENCE = 27,
+
 
 
 };
@@ -11364,6 +11369,7 @@ public:
         return mImpl->getRemoteAutoTuningConfig();
     }
 
+
     //!
     //! \brief Set the build route to be passed to the compiler.
     //!
@@ -11554,6 +11560,7 @@ public:
     {
         return mImpl->createBuilderConfig();
     }
+
 
     //!
     //! \brief Create a network definition object

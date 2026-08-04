@@ -174,7 +174,7 @@ def upgrade_tensorrt(pip_spec: str) -> bool:
     """Upgrade/install TensorRT using pip.
 
     Args:
-        pip_spec: PIP specifier for TensorRT, e.g. "tensorrt-cu12" or "tensorrt-cu12==10.16.*"
+        pip_spec: PIP specifier for TensorRT, e.g. "tensorrt-cu13" or "tensorrt-cu13==10.16.*"
 
     Returns:
         True on success, False otherwise
@@ -516,7 +516,7 @@ def main():
     # Install system dependency (best-effort) and ensure TensorRT is present
     install_libgl1()
     if not args.skip_tensorrt:
-        upgrade_tensorrt("tensorrt-cu12")
+        upgrade_tensorrt("tensorrt-cu13")
     else:
         log("Skipping TensorRT upgrade (--skip-tensorrt specified)")
 

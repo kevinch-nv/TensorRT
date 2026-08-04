@@ -34,7 +34,7 @@
 #endif
 
 using namespace nvinfer1;
-using samplesCommon::startsWith;
+using namespace std::string_view_literals;
 
 namespace sample
 {
@@ -231,7 +231,7 @@ void sparsifyMatMulKernelWeights(nvinfer1::INetworkDefinition& network, std::vec
         return true;
     };
     auto tensorReachedViaTranspose = [&](nvinfer1::ITensor* t, bool& needTranspose) -> ITensor* {
-        while (shuffleI2L.find(t) != shuffleI2L.end())
+        while (shuffleI2L.contains(t))
         {
             nvinfer1::IShuffleLayer* s = static_cast<nvinfer1::IShuffleLayer*>(shuffleI2L.at(t));
             if (!is2D(s->getInput(0)->getDimensions()) || !is2D(s->getReshapeDimensions())
@@ -262,7 +262,7 @@ void sparsifyMatMulKernelWeights(nvinfer1::INetworkDefinition& network, std::vec
         // Need to transpose by default due to semantic difference.
         bool needTranspose{true};
         ITensor* t = tensorReachedViaTranspose(o2l.first, needTranspose);
-        if (matmulI2L.find(t) == matmulI2L.end())
+        if (!matmulI2L.contains(t))
         {
             continue;
         }
@@ -1054,7 +1054,7 @@ std::vector<std::string> resolveArgvPaths(int32_t argc, char** argv)
         bool resolved = false;
         for (auto const& prefix : kSIMPLE_PATH_FLAGS)
         {
-            if (startsWith(arg, prefix))
+            if (arg.starts_with(prefix))
             {
                 result.push_back(prefix + resolveAbsolutePath(arg.substr(prefix.size())));
                 resolved = true;
@@ -1069,11 +1069,10 @@ std::vector<std::string> resolveArgvPaths(int32_t argc, char** argv)
         // Check mapped path flags (--flag=name:path,name:path -> resolve each path)
         for (auto const& prefix : kMAPPED_PATH_FLAGS)
         {
-            if (startsWith(arg, prefix))
+            if (arg.starts_with(prefix))
             {
-                std::string value = arg.substr(prefix.size());
                 // Split on ',' to get individual name:path pairs
-                auto pairs = splitToStringVec(value, ',');
+                auto pairs = splitToStringVec(arg.substr(prefix.size()), ',');
                 std::string resolvedValue;
                 for (uint64_t p = 0; p < pairs.size(); ++p)
                 {
@@ -1251,14 +1250,14 @@ std::vector<std::string> reconstructArgvFromCacheHeader(
         // Replace --tuneBuildRoutes or --tuneBuildRouteFile with the stored tuning_expr.
         // This handles the case where --tuneBuildRouteFile was used originally but the
         // file no longer exists — the expanded expression is stored in tuning_expr.
-        if (startsWith(arg, "--tuneBuildRoutes=") || startsWith(arg, "--tuneBuildRouteFile="))
+        if (arg.starts_with("--tuneBuildRoutes=") || arg.starts_with("--tuneBuildRouteFile="))
         {
             continue; // Will be re-added below with the stored tuning_expr.
         }
 
         // Remove --continue and --tuningCacheFile from the stored argv to avoid
         // recursion (the stored run may itself have been a --continue run).
-        if (arg == "--continue" || startsWith(arg, "--tuningCacheFile="))
+        if (arg == "--continue"sv || arg.starts_with("--tuningCacheFile="))
         {
             continue;
         }

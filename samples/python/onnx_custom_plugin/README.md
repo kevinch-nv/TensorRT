@@ -13,7 +13,7 @@
 
 ## Description
 
-This sample, `onnx_custom_plugin`, demonstrates how to use plugins written in C++ with the TensorRT Python bindings and ONNX Parser. This sample uses the [BiDAF Model](https://github.com/onnx/models/tree/main/text/machine_comprehension/bidirectional_attention_flow) from ONNX Model Zoo.
+This sample, `onnx_custom_plugin`, demonstrates how to use plugins written in C++ with the TensorRT Python bindings and ONNX Parser. This sample uses the [BiDAF Model](https://github.com/onnx/models/tree/main/validated/text/machine_comprehension/bidirectional_attention_flow) from ONNX Model Zoo.
 
 ## How does this sample work?
 
@@ -47,7 +47,7 @@ This file specifies all the Python packages required to run this Python sample.
 
 ## Prerequisites
 
-For specific software versions, see the [TensorRT Installation Guide](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html).
+For specific software versions, see the [TensorRT Installation Guide](https://docs.nvidia.com/deeplearning/tensorrt/latest/installing-tensorrt/installing.html).
 
 1. Install the dependencies for Python.
 
@@ -144,13 +144,13 @@ The following resources provide a deeper understanding about getting started wit
 - [BiDAF model](https://allenai.github.io/bi-att-flow/)
 
 **Documentation**
-- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The Python API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#python_topics)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The Python API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/python-api-docs.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 # License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 # Changelog
 March 2026

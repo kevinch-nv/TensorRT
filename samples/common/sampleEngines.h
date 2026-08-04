@@ -162,7 +162,7 @@ public:
             // as read-only (e.g. writing to disk / passing to deserialize APIs).
             return EngineBlob{static_cast<void*>(const_cast<uint8_t*>(mEngineBlob.data())), mEngineBlob.size()};
         }
-        if (mEngineBlobHostMemory != nullptr && mEngineBlobHostMemory->size() > 0)
+        if (mEngineBlobHostMemory != nullptr)
         {
             return EngineBlob{mEngineBlobHostMemory->data(), mEngineBlobHostMemory->size()};
         }
@@ -170,11 +170,29 @@ public:
     }
 
     //!
+    //! \brief Check whether the underlying blob is present, even if it is empty.
+    //!
+    [[nodiscard]] bool hasBlob() const
+    {
+        return !mEngineBlob.empty() || mEngineBlobHostMemory != nullptr;
+    }
+
+    //!
     //! \brief Set the underlying blob storing the serialized engine without duplicating IHostMemory.
     //!
-    void setBlob(std::unique_ptr<nvinfer1::IHostMemory>& data)
+    void setBlob(std::unique_ptr<nvinfer1::IHostMemory> data)
     {
         ASSERT(data.get() && data->size() > 0);
+        mEngineBlobHostMemory = std::move(data);
+        mEngine.reset();
+    }
+
+    //!
+    //! \brief Set the underlying blob without duplicating IHostMemory, allowing an empty blob.
+    //!
+    void setBlobOrEmpty(std::unique_ptr<nvinfer1::IHostMemory> data)
+    {
+        ASSERT(data.get() != nullptr);
         mEngineBlobHostMemory = std::move(data);
         mEngine.reset();
     }
@@ -218,6 +236,7 @@ public:
     {
         mDynamicPlugins = dynamicPlugins;
     }
+
 
 private:
     bool mIsSafe{false};
@@ -374,6 +393,7 @@ bool timeRefit(nvinfer1::INetworkDefinition const& network, nvinfer1::ICudaEngin
     void const* serializedEngine, int64_t const engineSize, std::vector<std::string> const& pluginBuildLibPath);
 
 bool loadStreamingEngineToBuildEnv(std::string const& engine, BuildEnvironment& env, std::ostream& err);
+
 
 bool loadEngineToBuildEnv(std::string const& engine, BuildEnvironment& env, std::ostream& err, SystemOptions const& sys,
     bool const enableConsistency);

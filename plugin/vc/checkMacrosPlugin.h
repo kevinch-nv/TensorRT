@@ -246,11 +246,45 @@ inline void caughtError(std::exception const& e)
         }                                                                                                              \
     } while (0)
 
-// On MSVC, nested macros don't expand correctly without some help, so use TRT_EXPAND to help it out.
-#define TRT_EXPAND(x) x
-#define GET_MACRO(_1, _2, NAME, ...) NAME
+//! Expands to the first argument from a variadic list.
+#define TRT_PLUGIN_DETAIL_FIRST(a, ...) a
+
+#if __cplusplus >= 202002L
+
+//! Expands to the second argument if present; otherwise the first argument.
+#define TRT_PLUGIN_DETAIL_SECOND_OR_FIRST(first, ...) TRT_PLUGIN_DETAIL_FIRST(__VA_ARGS__ __VA_OPT__(, ) first)
+
+//! Counts up to 3 elements in `__VA_ARGS__`. Returns 0/1/2/3+ where 3+ caps at 3. The leading `_x` sentinel
+//! plus `__VA_OPT__(,)` is what makes the empty-pack case (count == 0) selectable.
+#define TRT_PLUGIN_DETAIL_COUNT_IMPL(_1, _2, _3, _4, N, ...) N
+#define TRT_PLUGIN_DETAIL_COUNT(...) TRT_PLUGIN_DETAIL_COUNT_IMPL(_x __VA_OPT__(, ) __VA_ARGS__, 3, 2, 1, 0)
+
+//! Validate \p condition and report a failure with either the stringified condition (no message argument) or a
+//! user-supplied \p msg (exactly one message argument). A static_assert rejects 2+ message arguments so callers
+//! don't silently lose pieces of a multi-part diagnostic; build the composite message before invoking instead.
+#define PLUGIN_VALIDATE(condition, ...)                                                                                \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        static_assert(TRT_PLUGIN_DETAIL_COUNT(__VA_ARGS__) <= 1,                                                       \
+            "PLUGIN_VALIDATE accepts at most one optional message argument");                                          \
+        PLUGIN_VALIDATE_MSG(condition, TRT_PLUGIN_DETAIL_SECOND_OR_FIRST(#condition __VA_OPT__(, ) __VA_ARGS__));      \
+    } while (0)
+
+#else // __cplusplus >= 202002L
+
+// C++17 fallback for the RTX embedded-plugins target, which is held at C++17 as a WAR for the
+// CUDA 13.4 cudafe++ ICE with C++20 (nvbugs/6203314). Uses arity dispatch to pick the right macro
+// form; the "<= 1 message arg" static_assert is only enforced in the C++20 path.
+// On MSVC, nested macros don't expand correctly without some help, so use TRT_PLUGIN_DETAIL_EXPAND.
+#define TRT_PLUGIN_DETAIL_EXPAND(x) x
+#define TRT_PLUGIN_DETAIL_GET_VALIDATE(_1, _2, NAME, ...) NAME
 #define PLUGIN_VALIDATE(...)                                                                                           \
-    TRT_EXPAND(GET_MACRO(__VA_ARGS__, PLUGIN_VALIDATE_MSG, PLUGIN_VALIDATE_DEFAULT, )(__VA_ARGS__))
+    TRT_PLUGIN_DETAIL_EXPAND(                                                                                          \
+        TRT_PLUGIN_DETAIL_GET_VALIDATE(__VA_ARGS__, PLUGIN_VALIDATE_MSG, PLUGIN_VALIDATE_DEFAULT, )(__VA_ARGS__))
+
+#define PLUGIN_VALIDATE_DEFAULT(condition) PLUGIN_VALIDATE_MSG(condition, #condition)
+
+#endif // __cplusplus >= 202002L
 
 //! Compile-time guard: rejects conditions that decay to \c char \c const*.
 //! The bug this catches is \c PLUGIN_VALIDATE("some message") (or with \c .c_str()), where the
@@ -262,16 +296,6 @@ inline void caughtError(std::exception const& e)
 // Logs failed condition and throws a PluginError.
 // PLUGIN_ASSERT will eventually perform this function, at which point PLUGIN_VALIDATE
 // will be removed.
-#define PLUGIN_VALIDATE_DEFAULT(condition)                                                                             \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        PLUGIN_DETAIL_REJECT_STRING_CONDITION(condition);                                                              \
-        if (!(condition))                                                                                              \
-        {                                                                                                              \
-            nvinfer1::plugin::throwPluginError(__FILE__, FN_NAME, __LINE__, 0, #condition);                            \
-        }                                                                                                              \
-    } while (0)
-
 #define PLUGIN_VALIDATE_MSG(condition, msg)                                                                            \
     do                                                                                                                 \
     {                                                                                                                  \

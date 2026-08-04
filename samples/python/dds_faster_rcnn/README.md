@@ -1,6 +1,6 @@
 # DDS Faster R-CNN Object Detection in TensorRT
 ## Introduction
-The `dds_faster_rcnn` sample demonstrates the usage of [tensorrt.IOutputAllocator](https://docs.nvidia.com/deeplearning/tensorrt/api/python_api/infer/Core/ExecutionContext.html#tensorrt.IOutputAllocator) in TensorRT to execute networks with data-dependent shape (DDS) outputs. In this sample, we showcase an end-to-end workflow for building and running an object detection model [Faster-RCNN](https://arxiv.org/abs/1506.01497).
+The `dds_faster_rcnn` sample demonstrates the usage of [tensorrt.IOutputAllocator](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/python-api/infer/Core/ExecutionContext.html#tensorrt.IOutputAllocator) in TensorRT to execute networks with data-dependent shape (DDS) outputs. In this sample, we showcase an end-to-end workflow for building and running an object detection model [Faster-RCNN](https://arxiv.org/abs/1506.01497).
 
 ### What are Data-Dependent Shapes (DDS)?
 Data-Dependent Shapes (DDS) refer to shapes of layer outputs in a neural network which depend on the input data to the layer; in other words, it cannot be inferred solely by inspecting the shapes of the layer's input tensors.  An example of this is the output shape of the `INonZeroLayer`, which is determined by the number of non-zero elements in the input tensor.
@@ -22,7 +22,7 @@ During inference, the TensorRT engine will call these methods to manage the memo
 
 Here is a high-level overview of the workflow:
 
-1. Instantiate the output allocator and attach to TensorRT with [IExecutionContext.set_output_allocator()](https://docs.nvidia.com/deeplearning/tensorrt/api/python_api/infer/Core/ExecutionContext.html#tensorrt.IExecutionContext.set_output_allocator)
+1. Instantiate the output allocator and attach to TensorRT with [IExecutionContext.set_output_allocator()](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/python-api/infer/Core/ExecutionContext.html#tensorrt.IExecutionContext.set_output_allocator)
 1. The TensorRT engine determines that an output tensor needs to be allocated or reallocated.
 1. `reallocate_output_async` is called to allocate or reallocate memory for the output tensor.
 1. The allocator updates its internal state and returns the new memory address.

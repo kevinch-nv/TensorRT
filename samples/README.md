@@ -26,6 +26,7 @@
 | [simpleProgressMonitor](python/simple_progress_monitor) | Python | ONNX | Progress Monitor API usage |
 | [python_plugin](python/python_plugin) | Python | INetwork/ONNX | Python-based TRT plugins |
 | [non_zero_plugin](python/non_zero_plugin) | Python | INetwork/ONNX | Python-based TRT plugin for NonZero op |
+| [sample_plugin_v2_to_v3_migration](python/sample_plugin_v2_to_v3_migration) | Python | INetwork | Migrating a custom plugin from IPluginV2DynamicExt to IPluginV3 |
 | [cute_dsl_plugin](python/cute_dsl_plugin) | Python | INetwork | Python-based TRT plugin for RMSNorm with a CuteDSL kernel |
 | [attention_mdtrt](python/attention_mdtrt) | Python | ONNX | Multi-device attention inference with MPI and NCCL |
 
@@ -45,7 +46,7 @@
 
 Many samples require the TensorRT sample data package. If not already mounted under `/usr/src/tensorrt/data` (NVIDIA NGC containers), download and extract it:
 
-1. Download the current [TensorRT sample data package](https://github.com/NVIDIA/TensorRT/releases/download/v11.0/tensorrt_sample_data_20260602.zip). Sample data is updated only when needed, so the package may be hosted under an earlier TensorRT release.
+1. Download the sample data from [TensorRT GitHub Releases](https://github.com/NVIDIA/TensorRT/releases).
 
 2. Extract and set up the data:
     ```bash

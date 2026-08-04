@@ -244,11 +244,11 @@ The following resources provide a deeper understanding about sampleSafePluginV3.
 - Sample data available in [TensorRT GitHub Releases](https://github.com/NVIDIA/TensorRT/releases).
 
 **Documentation**
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 ## License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 
 ## Changelog

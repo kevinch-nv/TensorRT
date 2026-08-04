@@ -21,7 +21,7 @@ ARG OS_VERSION=24.04
 FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${OS_VERSION}
 LABEL maintainer="NVIDIA CORPORATION"
 
-ENV TRT_VERSION 11.1.0.106
+ENV TRT_VERSION 11.2.1.2
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Setup user account and edit default account
@@ -99,9 +99,9 @@ RUN wget https://developer.download.nvidia.com/compute/cuda/13.3.0/local_install
 
 # Unpack libnvinfer.
 
-RUN wget https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.1.0/tars/TensorRT-Enterprise-11.1.0.106-Linux-aarch64-cuda-13.3-Release-external.tar.zst && \
-    tar -xf TensorRT-Enterprise-11.1.0.106-Linux-aarch64-cuda-13.3-Release-external.tar.zst && \
-    cp -a TensorRT-11.1.0.106/lib/*.so* /usr/lib/aarch64-linux-gnu
+RUN wget https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.2.1/tars/TensorRT-Enterprise-11.2.1.2-Linux-aarch64-cuda-13.3-Release-external.tar.zst && \
+    tar -xf TensorRT-Enterprise-11.2.1.2-Linux-aarch64-cuda-13.3-Release-external.tar.zst && \
+    cp -a TensorRT-11.2.1.2/lib/*.so* /usr/lib/aarch64-linux-gnu
 
 # Link required library
 RUN cd /usr/aarch64-linux-gnu/lib && ln -sf librt.so.1 librt.so

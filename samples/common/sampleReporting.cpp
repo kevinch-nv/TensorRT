@@ -211,11 +211,9 @@ void printMetricExplanations(std::ostream& os)
 PerformanceResult getPerformanceResult(std::vector<InferenceTime> const& timings,
     std::function<float(InferenceTime const&)> metricGetter, std::vector<float> const& percentiles)
 {
-    auto const metricComparator
-        = [metricGetter](InferenceTime const& a, InferenceTime const& b) { return metricGetter(a) < metricGetter(b); };
     auto const metricAccumulator = [metricGetter](float acc, InferenceTime const& a) { return acc + metricGetter(a); };
     std::vector<InferenceTime> newTimings = timings;
-    std::sort(newTimings.begin(), newTimings.end(), metricComparator);
+    std::ranges::sort(newTimings, {}, metricGetter);
     PerformanceResult result;
     result.min = metricGetter(newTimings.front());
     result.max = metricGetter(newTimings.back());

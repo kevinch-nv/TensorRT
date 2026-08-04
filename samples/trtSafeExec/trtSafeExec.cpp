@@ -97,10 +97,6 @@ public:
 
 namespace
 {
-[[nodiscard]] constexpr bool startsWith(std::string_view a, std::string_view b)
-{
-    return a.size() >= b.size() && a.substr(0, b.size()) == b;
-}
 
 //! Default alignment for memory allocations
 constexpr uint64_t kDEFAULT_ALIGNMENT{256U};
@@ -172,24 +168,11 @@ public:
         return mPtr == other.mPtr;
     }
 
-    bool operator!=(ScopedSafeMemory const& other) const noexcept
-    {
-        return mPtr != other.mPtr;
-    }
-
 private:
     void* mPtr;
     nvinfer2::safe::MemoryPlacement mPlacement;
     nvinfer2::safe::ISafeRecorder& mRecorder;
 };
-
-//! Similar to C++20 template function std::ssize.
-template <class C>
-constexpr auto signedSize(C const& c) -> std::common_type_t<std::ptrdiff_t, std::make_signed_t<decltype(c.size())>>
-{
-    /* polyspace +2 RTE:OVFL [Justified:Low] */
-    return static_cast<std::common_type_t<std::ptrdiff_t, std::make_signed_t<decltype(c.size())>>>(c.size());
-}
 
 std::optional<std::string> loggedParseString(std::string const& arg, std::string const& name)
 {
@@ -274,11 +257,9 @@ float findCoeffOfVariance(TimingMetrics const& times, int32_t metricIndex, float
 //! \return The performance result of a performance metric
 SafePerformanceResult getSafePerformanceResult(TimingMetrics const& times, int32_t metricIndex, float percent)
 {
-    auto const ascendingSorter
-        = [metricIndex](TimingMetric& a, TimingMetric& b) { return a[metricIndex] < b[metricIndex]; };
     // make a copy w/o const qualifier
     TimingMetrics newTimes = times;
-    std::sort(newTimes.begin(), newTimes.end(), ascendingSorter);
+    std::ranges::sort(newTimes, {}, [metricIndex](TimingMetric const& a) { return a[metricIndex]; });
     SafePerformanceResult result;
     result.min = newTimes[0][metricIndex];
     result.max = newTimes[newTimes.size() - 1][metricIndex];
@@ -500,18 +481,17 @@ bool parseSafetyPluginLibrary(
     std::string const& arg, std::string const& name, SafetyPluginLibraryArgument& pluginLibArgs)
 {
     std::string const pattern = "--" + name + "=";
-    bool const matched = startsWith(arg, pattern);
-    bool status{false};
-    if (matched)
+    if (!arg.starts_with(pattern))
     {
-        std::string const optionStr = arg.substr(pattern.size());
-        status = parseSafetyPluginArgument(optionStr, pluginLibArgs);
-        if (!status)
-        {
-            safeLogError(*gSafeRecorder, "Unable to parse safety plugin library argument: " + arg);
-        }
+        return false;
     }
-    return matched && status;
+    std::string const optionStr = arg.substr(pattern.size());
+    bool const status = parseSafetyPluginArgument(optionStr, pluginLibArgs);
+    if (!status)
+    {
+        safeLogError(*gSafeRecorder, "Unable to parse safety plugin library argument: " + arg);
+    }
+    return status;
 }
 
 // Use template to allow volume for either nvinfer1::Dims or nvinfer2::safe::PhysicalDims
@@ -538,8 +518,6 @@ int64_t volume(TDims const& dims, TDims const& strides, uint64_t bytesPerCompone
     volume = std::max(volume, dims.d[0] * strides.d[0]);
     return volume * bytesPerComponent;
 }
-
-} // anonymous namespace
 
 //!
 //! \brief This function parses arguments specific to the sample
@@ -743,9 +721,9 @@ void registerSafetyPlugins(nvinfer2::safe::ISafeRecorder& recorder, SafetyPlugin
             continue;
         }
 
-        typedef IPluginCreatorInterface* (*getPluginCreatorFn)(char const*, char const*);
+        using GetPluginCreatorFn = IPluginCreatorInterface* (*) (char const*, char const*);
         auto pluginCreatorGetter
-            = reinterpret_cast<getPluginCreatorFn>(dlsym(libraryHandle, pluginGetterSymbolName.c_str()));
+            = reinterpret_cast<GetPluginCreatorFn>(dlsym(libraryHandle, pluginGetterSymbolName.c_str()));
         if (pluginCreatorGetter == nullptr)
         {
             safeLogError(
@@ -1164,8 +1142,7 @@ bool task(SafeExecArgs const& args, nvinfer2::safe::ITRTGraph* graph, nvinfer2::
         std::stringstream ss;
 
         // Sort GPU times
-        std::sort(totalTimes.begin(), totalTimes.end(),
-            [](TimingMetric const& a, TimingMetric const& b) { return a[0] < b[0]; });
+        std::ranges::sort(totalTimes, {}, [](TimingMetric const& a) { return a[0]; });
         auto const gpuTimeResult = getSafePerformanceResult(totalTimes, 0, args.percentile);
         auto const hostTimeResult = getSafePerformanceResult(totalTimes, 1, args.percentile);
         auto const enqueueTimeResult = getSafePerformanceResult(totalTimes, 2, args.percentile);
@@ -1355,6 +1332,8 @@ bool setDevice(SafeExecArgs const& args)
 
     return true;
 }
+
+} // namespace
 
 int32_t main(int32_t argc, char** argv)
 {

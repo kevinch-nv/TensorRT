@@ -108,12 +108,7 @@ int32_t maxPoolFloat(cudaStream_t stream, int32_t batch_size, int32_t C, int32_t
 
     maxKernel<float><<<g, blocksize, 0, stream>>>(
         batch_size, C, H, W, static_cast<const float*>(input), static_cast<float*>(output), kernsize, stride, pad);
-    auto retVal = cudaStreamSynchronize(stream);
-    if (retVal != cudaSuccess)
-    {
-        return 1;
-    }
-    return 0;
+    return static_cast<int32_t>(cudaGetLastError() != cudaSuccess);
 }
 
 int32_t maxPoolHalf(cudaStream_t stream, int32_t batch_size, int32_t C, int32_t H, int32_t W, const void* input, void* output,
@@ -126,12 +121,7 @@ int32_t maxPoolHalf(cudaStream_t stream, int32_t batch_size, int32_t C, int32_t 
 
     maxKernel<half><<<g, blocksize, 0, stream>>>(
         batch_size, C, H, W, static_cast<const half*>(input), static_cast<half*>(output), kernsize, stride, pad);
-    auto retVal = cudaStreamSynchronize(stream);
-    if (retVal != cudaSuccess)
-    {
-        return 1;
-    }
-    return 0;
+    return static_cast<int32_t>(cudaGetLastError() != cudaSuccess);
 }
 
 int32_t maxPoolInt8(cudaStream_t stream, int32_t batch_size, int32_t C, int32_t H, int32_t W, const void* input, void* output,
@@ -144,10 +134,5 @@ int32_t maxPoolInt8(cudaStream_t stream, int32_t batch_size, int32_t C, int32_t 
 
     maxKernel<int8_t><<<g, blocksize, 0, stream>>>(
         batch_size, C, H, W, static_cast<int8_t const*>(input), static_cast<int8_t*>(output), kernsize, stride, pad);
-    auto retVal = cudaStreamSynchronize(stream);
-    if (retVal != cudaSuccess)
-    {
-        return 1;
-    }
-    return 0;
+    return static_cast<int32_t>(cudaGetLastError() != cudaSuccess);
 }

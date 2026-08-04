@@ -1,4 +1,15 @@
 # TensorRT OSS Release Changelog
+## 11.2 GA - 2026-8-4
+- Samples
+ - Added a new python sample sample_plugin_v2_to_v3_migration to showcase how to migrate from IPluginV2 to IPluginV3.
+
+- Plugins
+ - Added a new FFTPlugin, a cuFFT-backed plugin for complex-to-complex, real-to-complex, and complex-to-real transforms, to support the ONNX DFT operator.
+
+- Parsers
+ - Added IRefitterObserver class for better refitting of ONNX models.
+ - Added support for the DFT operator and 5D GridSample operators.
+
 ## 11.1 GA - 2026-6-24
 - General
   - Default CUDA version updated to 13.3.

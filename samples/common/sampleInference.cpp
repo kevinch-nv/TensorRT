@@ -495,13 +495,6 @@ bool setUpSafeInference(InferenceEnvironmentSafe& iEnv, InferenceOptions const& 
     // Always use refPairs[0] for initial binding setup; other pairs are loaded in inferenceLoop
     int64_t constexpr kPAIR_INDEX = 0;
 
-    int32_t device{};
-    CHECK(cudaGetDevice(&device));
-
-    cudaDeviceProp properties;
-    CHECK(cudaGetDeviceProperties(&properties, device));
-    int32_t const isIntegrated{properties.integrated};
-
     ASSERT(sample::hasSafeRuntime());
     ASSERT(sample::safe::initNvinferSafe());
 
@@ -512,13 +505,12 @@ bool setUpSafeInference(InferenceEnvironmentSafe& iEnv, InferenceOptions const& 
 
     std::unique_ptr<nvinfer2::safe::ITRTGraph> safeGraph;
 
-    // Use managed memory on integrated devices when transfers are skipped
-    // and when it is explicitly requested on the commandline.
-    bool useManagedMemory{(!inference.includeTransfers && isIntegrated) || inference.useManaged};
+    // Use managed memory only when it is explicitly requested on the command line.
+    bool const useManagedMemory{inference.useManaged};
 
     nvinfer2::safe::ITRTGraph* tempGraph = nullptr;
     if (sample::safe::createSafeTRTGraph(
-            tempGraph, safeEngineBlob.data, safeEngineBlob.size, *gSafeRecorder, true, nullptr)
+            tempGraph, safeEngineBlob.data, safeEngineBlob.size, *gSafeRecorder, useManagedMemory, nullptr)
         != nvinfer2::safe::ErrorCode::kSUCCESS)
     {
         sample::gLogError << "Create Safe TRT Graph Failed." << std::endl;
@@ -585,8 +577,8 @@ bool setUpSafeInference(InferenceEnvironmentSafe& iEnv, InferenceOptions const& 
 }
 #endif
 
-IExecutionContext* setupExecutionContext(
-    nvinfer1::ICudaEngine* engine, InferenceOptions const& inference, std::optional<cudaDeviceProp> const& properties)
+IExecutionContext* setupExecutionContext(InferenceEnvironmentStd& iEnv, nvinfer1::ICudaEngine* engine,
+    InferenceOptions const& inference, std::optional<cudaDeviceProp> const& properties)
 {
     IExecutionContext* ec{nullptr};
 
@@ -638,10 +630,8 @@ bool setUpStdInference(InferenceEnvironmentStd& iEnv, InferenceOptions const& in
 
     properties = std::make_optional<cudaDeviceProp>();
     CHECK(cudaGetDeviceProperties(&properties.value(), device));
-    int32_t const isIntegrated{properties.value().integrated};
-    // Use managed memory on integrated devices when transfers are skipped
-    // and when it is explicitly requested on the commandline.
-    bool useManagedMemory{(!inference.includeTransfers && isIntegrated) || inference.useManaged};
+    // Use managed memory only when it is explicitly requested on the command line.
+    bool const useManagedMemory{inference.useManaged};
 
     using FillStdBindings = FillBindingClosure<nvinfer1::ICudaEngine>;
 
@@ -717,7 +707,7 @@ bool setUpStdInference(InferenceEnvironmentStd& iEnv, InferenceOptions const& in
 
     for (int32_t s = 0; s < inference.infStreams; ++s)
     {
-        IExecutionContext* ec = setupExecutionContext(engine, inference, properties);
+        IExecutionContext* ec = setupExecutionContext(iEnv, engine, inference, properties);
         if (ec == nullptr)
         {
             sample::gLogError << "Unable to create execution context for inference stream " << s << ". " << std::endl;
@@ -782,7 +772,7 @@ bool setUpStdInference(InferenceEnvironmentStd& iEnv, InferenceOptions const& in
                                             << "Automatically setting shape to: " << shapeData << std::endl;
                     }
                 }
-                else if (inferenceInputs.count(shape->first) && isShapeInferenceIO)
+                else if (inferenceInputs.contains(shape->first) && isShapeInferenceIO)
                 {
                     // Load shape tensor from file.
                     int64_t const size = volume(dims, 0, dims.nbDims);
@@ -1882,8 +1872,7 @@ bool runInference(InferenceOptions const& inference, InferenceEnvironmentBase& i
     }
     CHECK(cudaProfilerStop());
 
-    auto cmpTrace = [](InferenceTrace const& a, InferenceTrace const& b) { return a.h2dStart < b.h2dStart; };
-    std::sort(trace.begin(), trace.end(), cmpTrace);
+    std::ranges::sort(trace, {}, &InferenceTrace::h2dStart);
 
 
     return !iEnv.error;
@@ -1915,10 +1904,9 @@ bool runMultiTasksInference(std::vector<std::unique_ptr<TaskInferenceEnvironment
 
     CHECK(cudaProfilerStop());
 
-    auto cmpTrace = [](InferenceTrace const& a, InferenceTrace const& b) { return a.h2dStart < b.h2dStart; };
     for (auto& tEnv : tEnvList)
     {
-        std::sort(tEnv->trace.begin(), tEnv->trace.end(), cmpTrace);
+        std::ranges::sort(tEnv->trace, {}, &InferenceTrace::h2dStart);
     }
 
     return std::none_of(tEnvList.begin(), tEnvList.end(),

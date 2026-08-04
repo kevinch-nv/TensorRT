@@ -161,11 +161,6 @@ public:
         return mIndex == other.mIndex;
     }
 
-    bool operator!=(DataIterator const& other) const
-    {
-        return mIndex != other.mIndex;
-    }
-
     DataIterator operator+(int64_t n) const
     {
         DataIterator tmp = *this;

@@ -36,12 +36,12 @@ To verify whether the engine is operating correctly, this sample picks a 28x28 i
 
 ### TensorRT API layers and ops
 
-In this sample, the following layers are used. For more information about these layers, see the [TensorRT API: Layers](https://docs.nvidia.com/deeplearning/tensorrt/api/python_api/infer/Graph/Layers.html) documentation.
+In this sample, the following layers are used. For more information about these layers, see the [TensorRT API: Layers](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/python-api/infer/Graph/Layers.html) documentation.
 
-[Activation layer](https://docs.nvidia.com/deeplearning/tensorrt/operators/docs/Activation.html)
+[Activation layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Activation.html)
 The Activation layer implements element-wise activation functions. Specifically, this sample uses the Activation layer with the type `kRELU`.
 
-[Convolution layer](https://docs.nvidia.com/deeplearning/tensorrt/operators/docs/Convolution.html)
+[Convolution layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Convolution.html)
 The Convolution layer computes a 2D (channel, height, and width) convolution, with or without bias.
 
 
@@ -174,11 +174,11 @@ The following resources provide a deeper understanding about sampleSafeMNIST.
 - [MNIST dataset](https://github.com/NVIDIA/DIGITS/blob/master/docs/GettingStarted.md)
 
 **Documentation**
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 ## License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 
 ## Changelog
@@ -190,7 +190,7 @@ Dec. 2019
 Switch the sample to use ONNX model, and update the content of `README.md`.
 
 Jun. 2020
-This sample was updated to fit TensorRT API changes since version 6.3. Please see [TensorRT API](http://docs.nvidia.com/deeplearning/sdk/tensorrt-api/index.html).
+This sample was updated to fit TensorRT API changes since version 6.3. Please see [TensorRT API](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html).
 
 Sep. 2020
 This sample was updated to fit TensorRT API changes since version 6.4.

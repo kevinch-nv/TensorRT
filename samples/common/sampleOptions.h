@@ -309,6 +309,7 @@ public:
 
     bool allowWeightStreaming{false};
 
+
     int32_t tilingOptimizationLevel{defaultTilingOptimizationLevel};
     int64_t l2LimitForTiling{-1};
     bool distributiveIndependence{false};

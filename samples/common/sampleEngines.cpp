@@ -134,6 +134,7 @@ nvinfer1::ICudaEngine* LazilyDeserializedEngine::get()
             mRuntime->getPluginRegistry().loadLibrary(pluginPath.c_str());
         }
 
+
         if (getAsyncFileReader().isOpen())
         {
             mEngine.reset(mRuntime->deserializeCudaEngine(getAsyncFileReader()));
@@ -306,7 +307,7 @@ void markDebugTensors(INetworkDefinition& network, StringSet const& debugTensors
     {
         auto* t = network.getInput(inputIndex);
         auto const tensorName = t->getName();
-        if (debugTensors.count(tensorName) > 0)
+        if (debugTensors.contains(tensorName))
         {
             network.markDebug(*t);
         }
@@ -318,7 +319,7 @@ void markDebugTensors(INetworkDefinition& network, StringSet const& debugTensors
         {
             auto* t = layer->getOutput(outputIndex);
             auto const tensorName = t->getName();
-            if (debugTensors.count(tensorName) > 0)
+            if (debugTensors.contains(tensorName))
             {
                 network.markDebug(*t);
             }
@@ -772,26 +773,35 @@ bool setupNetworkAndConfig(BuildOptions const& build, SystemOptions const& sys, 
 bool buildSerializedEngine(BuildOptions const& build, SystemOptions const& sys, IBuilder& builder,
     INetworkDefinition& network, IBuilderConfig& config, BuildEnvironment& env, std::ostream& err)
 {
-    IHostMemory* serializedEngine{nullptr};
+    std::unique_ptr<IHostMemory> serializedEngine;
     if (build.safe && build.save && build.dumpKernelText)
     {
-        IHostMemory* kernelText{nullptr};
-        serializedEngine = builder.buildSerializedNetwork(network, config, kernelText);
-        if (kernelText != nullptr && kernelText->size() > 0)
+        IHostMemory* kernelTextPtr{nullptr};
+        serializedEngine = std::unique_ptr<IHostMemory>{builder.buildSerializedNetwork(network, config, kernelTextPtr)};
+        auto kernelText = std::unique_ptr<IHostMemory>{kernelTextPtr};
+        if (kernelText != nullptr)
         {
-            std::unique_ptr<IHostMemory> kernelTextPtr(kernelText);
-            env.kernelText.setBlob(kernelTextPtr);
-            sample::gLogInfo << "Created kernel CPP with size: " << (kernelText->size() / 1.0_MiB) << " MiB"
-                             << std::endl;
+            auto const kernelTextSize = kernelText->size();
+            env.kernelText.setBlobOrEmpty(std::move(kernelText));
+            if (kernelTextSize > 0)
+            {
+                sample::gLogInfo << "Created kernel CPP with size: " << (kernelTextSize / 1.0_MiB) << " MiB"
+                                 << std::endl;
+            }
+            else
+            {
+                sample::gLogInfo << "Created empty kernel CPP." << std::endl;
+            }
         }
         else
         {
             sample::gLogError << "Failed to create kernel CPP." << std::endl;
+            return false;
         }
     }
     else
     {
-        serializedEngine = builder.buildSerializedNetwork(network, config);
+        serializedEngine = std::unique_ptr<IHostMemory>{builder.buildSerializedNetwork(network, config)};
     }
     SMP_RETVAL_IF_FALSE(serializedEngine != nullptr, "Engine could not be created from network", false, err);
     sample::gLogInfo << "Created engine with size: " << (serializedEngine->size() / 1.0_MiB) << " MiB" << std::endl;
@@ -809,8 +819,7 @@ bool buildSerializedEngine(BuildOptions const& build, SystemOptions const& sys, 
             return false;
         }
     }
-    std::unique_ptr<IHostMemory> serializedEnginePtr(serializedEngine);
-    env.engine.setBlob(serializedEnginePtr);
+    env.engine.setBlob(std::move(serializedEngine));
     return true;
 }
 
@@ -1010,6 +1019,7 @@ bool loadAsyncStreamingEngineToBuildEnv(std::string const& filepath, BuildEnviro
     return true;
 }
 
+
 bool loadEngineToBuildEnv(std::string const& filepath, BuildEnvironment& env, std::ostream& err,
     SystemOptions const& sys, bool const enableConsistency)
 {
@@ -1204,10 +1214,18 @@ bool getEngineBuildEnv(
         {
             auto const engineTextFileName = build.engine + ".txt";
             auto const kernelTextBlob = env.kernelText.getBlobOrEmpty();
-            if (kernelTextBlob.data != nullptr && kernelTextBlob.size > 0)
+            if (env.kernelText.hasBlob())
             {
                 std::ofstream engineTextFile(engineTextFileName);
-                engineTextFile.write(static_cast<char const*>(kernelTextBlob.data), kernelTextBlob.size);
+                if (kernelTextBlob.size > 0)
+                {
+                    engineTextFile.write(static_cast<char const*>(kernelTextBlob.data), kernelTextBlob.size);
+                }
+                else
+                {
+                    sample::gLogInfo << "Kernel text was empty; created empty dump at " << engineTextFileName
+                                     << std::endl;
+                }
                 SMP_RETVAL_IF_FALSE(!engineTextFile.fail(), "Saving engine kernel text to file failed.", false, err);
                 engineTextFile.close();
             }

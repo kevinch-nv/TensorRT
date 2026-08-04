@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ function(update_windows_output_name target_name major_version minor_version)
             set(tgt_output_name ${target_name})
         endif()
 
-        if(${TRT_BUILD_WINML})
+        if(${TRT_PRODUCT_IS_RTX})
             set(tgt_output_name "${tgt_output_name}_${major_version}_${minor_version}")
         else()
             set(tgt_output_name "${tgt_output_name}_${major_version}")

@@ -70,7 +70,7 @@ if(${TRT_BUILD_SAMPLES})
         sampleProgressMonitor
     )
 
-    if (NOT ${TRT_BUILD_WINML})
+    if (NOT ${TRT_PRODUCT_IS_RTX})
         add_sample(
             sampleDynamicReshape
             sampleNonZeroPlugin

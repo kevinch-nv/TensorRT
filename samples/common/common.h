@@ -319,8 +319,7 @@ std::vector<size_t> argMagnitudeSort(Iter begin, Iter end)
 {
     std::vector<size_t> indices(end - begin);
     std::iota(indices.begin(), indices.end(), 0);
-    std::sort(indices.begin(), indices.end(),
-        [&begin](size_t i, size_t j) { return std::abs(begin[j]) < std::abs(begin[i]); });
+    std::ranges::sort(indices, std::greater<>{}, [&begin](size_t i) { return std::abs(begin[i]); });
     return indices;
 }
 
@@ -443,12 +442,6 @@ inline void enableDLA(
         config->setDefaultDeviceType(nvinfer1::DeviceType::kDLA);
         config->setDLACore(useDLACore);
     }
-}
-
-//! Simple implementation of startsWith for strings (C++20: `std::string_view::starts_with`)
-[[nodiscard]] constexpr bool startsWith(std::string_view str, std::string_view prefix)
-{
-    return str.size() >= prefix.size() && str.substr(0, prefix.size()) == prefix;
 }
 
 //! \brief Matches a flag prefix in an argument, ignoring leading spaces.

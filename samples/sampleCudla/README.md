@@ -32,7 +32,7 @@ Specifically:
 
 ### TensorRT API layers and ops
 
-In this sample, the [ElementWise](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#elementwise-layer) layer is used. For more information, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#layers) documentation.
+In this sample, the [ElementWise](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/ElementWise.html) layer is used. For more information, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/tensorrt/latest/api/operators.html) documentation.
 
 ## Prerequisites
 
@@ -86,14 +86,14 @@ To see the full list of available options and their descriptions, use the `./sam
 The following resources provide a deeper understanding of sampleCudla.
 
 **Documentation**
-- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#c_topics)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 - [Developer Guide for cuDLA APIs](https://docs.nvidia.com/cuda/cuda-for-tegra-appnote/index.html#cudla-intro)
 
 ## License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 
 ## Changelog

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 1993-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright (c) 1993-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 #ifndef TRT_SAMPLE_REPORTING_H
 #define TRT_SAMPLE_REPORTING_H
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <numeric>
@@ -244,7 +245,7 @@ private:
         {
             return 0.F;
         }
-        std::sort(vals.begin(), vals.end());
+        std::ranges::sort(vals);
         if (vals.size() % 2U == 1U)
         {
             return vals[vals.size() / 2U];

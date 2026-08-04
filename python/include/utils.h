@@ -190,6 +190,69 @@ void doNothingDel(const T& self)
 // https://nvbugs/3479811 Create a wrapper for C++ to python throw
 [[noreturn]] void throwPyError(PyObject* type, std::string const& message = "python error");
 
+//! \brief Validate a Dims returned by a TensorRT API.
+//!
+//! Several TensorRT APIs report failure by returning an invalid Dims (nbDims < 0) rather than raising an
+//! error. Surface that as a Python exception so callers get a clear failure instead of an unusable object.
+//!
+//! \param dims The Dims to validate.
+//! \param message The error message to raise when \p dims is invalid.
+//! \return \p dims unchanged when it is valid.
+[[nodiscard]] inline nvinfer1::Dims checkDims(nvinfer1::Dims const& dims, std::string const& message)
+{
+    if (dims.nbDims < 0)
+    {
+        throwPyError(PyExc_RuntimeError, message);
+    }
+    return dims;
+}
+
+//! \brief Wrap a no-argument Dims getter so an invalid result raises a Python exception.
+//!
+//! \param getter Pointer to the member function being wrapped.
+//! \param name Human-readable name of the queried value, used in the error message.
+//! \return A callable suitable for binding as a pybind11 property getter.
+template <typename Cls>
+[[nodiscard]] auto throwingDimsGetter(nvinfer1::Dims (Cls::*getter)() const noexcept, std::string name)
+{
+    return [getter, name](Cls& self) { return checkDims(std::invoke(getter, self), "Could not get " + name + "."); };
+}
+
+//! \brief Wrap a name-keyed Dims getter so an invalid result raises a Python exception.
+//!
+//! \param getter Pointer to the member function being wrapped.
+//! \param what Human-readable description of the queried value, used in the error message.
+//! \return A callable suitable for binding as a pybind11 method.
+template <typename Cls>
+[[nodiscard]] auto throwingNamedDimsGetter(nvinfer1::Dims (Cls::*getter)(char const*) const noexcept, std::string what)
+{
+    return [getter, what](Cls& self, char const* name) {
+        return checkDims(std::invoke(getter, self, name),
+            "Could not get " + what + " for tensor '" + std::string{name} + "'. Is the tensor name correct?");
+    };
+}
+
+//! \brief Wrap a no-argument Dims getter so an invalid result maps to None.
+//!
+//! Some TensorRT getters return an invalid Dims (nbDims < 0) to signal a legitimate state, e.g. the value is
+//! supplied dynamically through an input tensor rather than statically. Map that to None rather than exposing
+//! an unusable Dims object.
+//!
+//! \param getter Pointer to the member function being wrapped.
+//! \return A callable suitable for binding as a pybind11 property getter.
+template <typename Cls>
+[[nodiscard]] auto optionalDimsGetter(nvinfer1::Dims (Cls::*getter)() const noexcept)
+{
+    return [getter](Cls& self) -> py::object {
+        nvinfer1::Dims const dims = std::invoke(getter, self);
+        if (dims.nbDims < 0)
+        {
+            return py::none();
+        }
+        return py::cast(dims);
+    };
+}
+
 } // namespace utils
 
 #define PY_ASSERT_RUNTIME_ERROR(assertion, msg)                                                                        \

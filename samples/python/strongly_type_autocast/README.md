@@ -19,9 +19,9 @@
 
 This sample, `strongly_type_autocast`, uses ModelOpt's AutoCast tool to convert a FP32 ONNX model to mixed FP32-FP16 precision, and builds engine / runs inference with TensorRT's strong typing mode.
 
-[AutoCast](https://nvidia.github.io/TensorRT-Model-Optimizer/guides/8_autocast.html) is a tool for converting FP32 ONNX models to mixed precision FP32-FP16 or FP32-BF16 models. AutoCast intelligently selects nodes to keep in FP32 precision to maintain model accuracy while benefiting from reduced precision on the rest of the nodes. AutoCast automatically injects cast operations around the selected nodes.
+[AutoCast](https://nvidia.github.io/Model-Optimizer/guides/8_autocast.html) is a tool for converting FP32 ONNX models to mixed precision FP32-FP16 or FP32-BF16 models. AutoCast intelligently selects nodes to keep in FP32 precision to maintain model accuracy while benefiting from reduced precision on the rest of the nodes. AutoCast automatically injects cast operations around the selected nodes.
 
-[Strong Typing vs Weak Typing](https://docs.nvidia.com/deeplearning/tensorrt/latest/architecture/capabilities.html#strong-vs-weak-typing)
+[Strong Typing vs Weak Typing](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/capabilities.html#strong-vs-weak-typing)
 For strong typing, TensorRT adheres strictly to the type semantics in ONNX frameworks. For weak typing, TensorRT may substitute different precisions for tensors if it increases performance. Weak typing has been deprecated in 10.12. We recommend using AutoCast tool to convert the FP32 ONNX model to mixed precision before doing TensorRT strong typing optimization.
 
 ## How does this sample work?
@@ -101,15 +101,15 @@ To see the full list of available options and their descriptions, use the `-h` o
 The following resources provide a deeper understanding about AutoCast and TensorRT strong typing:
 
 **Documentation**
-- [Guide of TensorRT-Model-Optimizer Autocast](https://nvidia.github.io/TensorRT-Model-Optimizer/guides/8_autocast.html)
-- [TensorRT Strong Typing vs Weak Typing](https://docs.nvidia.com/deeplearning/tensorrt/latest/architecture/capabilities.html#strong-vs-weak-typing)
-- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The Python API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#python_topics)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Guide of TensorRT-Model-Optimizer Autocast](https://nvidia.github.io/Model-Optimizer/guides/8_autocast.html)
+- [TensorRT Strong Typing vs Weak Typing](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/capabilities.html#strong-vs-weak-typing)
+- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The Python API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/python-api-docs.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 # License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 # Changelog
 

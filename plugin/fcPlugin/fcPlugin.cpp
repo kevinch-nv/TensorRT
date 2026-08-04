@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cuda_runtime.h>
+#include <limits>
 #include <memory>
 #include <string_view>
 #include <vector>
@@ -64,11 +65,6 @@ static void printPerfStructure(customMatmulPerf_t const& perf, int32_t const m, 
                 << " Stat=" << perf.status << " Time=" << perf.time << " WSbytes=" << perf.workspaceSize
                 << " math=" << p.numericImpl << " waves=" << perf.wavesCount << "GFlops=" << (gflop / timeAvg)
                 << std::endl;
-}
-
-static bool timeCompare(customMatmulPerf_t const& perf_a, customMatmulPerf_t const& perf_b)
-{
-    return ((perf_a.status == CUBLAS_STATUS_SUCCESS) && (perf_a.time < perf_b.time));
 }
 
 static cublasStatus_t customMatmulRun(cublasLtHandle_t ltHandle, // to get the capabilities (required a GPU)
@@ -323,8 +319,10 @@ void nvinfer1::plugin::bert::LtGemmSearch(cublasLtHandle_t ltHandle, cublasOpera
         } // end tileIdx
     } // end idx
 
-    // Sort the results per run duration
-    std::sort(perfResults.begin(), perfResults.end(), timeCompare);
+    // Sort the results per run duration; push failures to the end.
+    std::ranges::sort(perfResults, {}, [](customMatmulPerf_t const& p) {
+        return p.status == CUBLAS_STATUS_SUCCESS ? p.time : std::numeric_limits<float>::infinity();
+    });
 
     // Print timing and perf details of the fastest combinations
     for (int32_t i = 0; i < kPRINT_ALGOS && perfResults[i].time != customMatmulPerf_t::kMAX_TIME; i++)

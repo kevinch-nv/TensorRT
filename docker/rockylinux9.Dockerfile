@@ -20,7 +20,7 @@ ARG CUDA_VERSION=13.3.0
 FROM nvidia/cuda:${CUDA_VERSION}-devel-rockylinux9
 LABEL maintainer="NVIDIA CORPORATION"
 
-ENV TRT_VERSION 11.1.0.106
+ENV TRT_VERSION 11.2.1.2
 SHELL ["/bin/bash", "-c"]
 
 # Setup user account
@@ -42,7 +42,7 @@ RUN pip install numpy
 RUN pip install jupyter jupyterlab
 
 # Install requried packages
-RUN dnf -y groupinstall "Development Tools"
+RUN dnf -y --nobest groupinstall "Development Tools"
 RUN dnf -y install \
     openssl-devel \
     bzip2-devel \
@@ -64,15 +64,15 @@ RUN dnf -y install ccache
 
 # Install TensorRT
 RUN if [ "${CUDA_VERSION:0:2}" = "13" ]; then \
-    wget https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.1.0/tars/TensorRT-Enterprise-11.1.0.106-Linux-x86_64-cuda-13.3-Release-external.tar.zst \
-    && tar --use-compress-program=unzstd -xf TensorRT-Enterprise-11.1.0.106-Linux-x86_64-cuda-13.3-Release-external.tar.zst \
-    && cp -a TensorRT-11.1.0.106/lib/*.so* /usr/lib64 \
-    && pip install TensorRT-11.1.0.106/python/tensorrt-11.1.0.106-cp39-none-linux_x86_64.whl ;\
+    wget https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.2.1/tars/TensorRT-Enterprise-11.2.1.2-Linux-x86_64-cuda-13.3-Release-external.tar.zst \
+    && tar --use-compress-program=unzstd -xf TensorRT-Enterprise-11.2.1.2-Linux-x86_64-cuda-13.3-Release-external.tar.zst \
+    && cp -a TensorRT-11.2.1.2/lib/*.so* /usr/lib64 \
+    && pip install TensorRT-11.2.1.2/python/tensorrt-11.2.1.2-cp39-none-linux_x86_64.whl ;\
     elif [ "${CUDA_VERSION:0:2}" = "12" ]; then \
-    wget https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.1.0/tars/TensorRT-Enterprise-11.1.0.106-Linux-x86_64-cuda-12.9-Release-external.tar.zst \
-    && tar --use-compress-program=unzstd -xf TensorRT-Enterprise-11.1.0.106-Linux-x86_64-cuda-12.9-Release-external.tar.zst \
-    && cp -a TensorRT-11.1.0.106/lib/*.so* /usr/lib64 \
-    && pip install TensorRT-11.1.0.106/python/tensorrt-11.1.0.106-cp39-none-linux_x86_64.whl ;\
+    wget https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.2.1/tars/TensorRT-Enterprise-11.2.1.2-Linux-x86_64-cuda-12.9-Release-external.tar.zst \
+    && tar --use-compress-program=unzstd -xf TensorRT-Enterprise-11.2.1.2-Linux-x86_64-cuda-12.9-Release-external.tar.zst \
+    && cp -a TensorRT-11.2.1.2/lib/*.so* /usr/lib64 \
+    && pip install TensorRT-11.2.1.2/python/tensorrt-11.2.1.2-cp39-none-linux_x86_64.whl ;\
     else \
     echo "Invalid CUDA_VERSION"; \
     exit 1; \

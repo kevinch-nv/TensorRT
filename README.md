@@ -48,7 +48,7 @@ To build the TensorRT-OSS components, you will first need the following software
 
 **TensorRT GA build**
 
-- TensorRT v11.1.0.106
+- TensorRT v11.2.1.2
   - Available from direct download links listed below
 
 **System Packages**
@@ -103,24 +103,24 @@ To build the TensorRT-OSS components, you will first need the following software
 
    Else download and extract the TensorRT GA build from [NVIDIA Developer Zone](https://developer.nvidia.com) with the direct links below:
 
-   - [TensorRT 11.1.0.106 for CUDA 13.3, Linux x86_64](https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.1.0/tars/TensorRT-Enterprise-11.1.0.106-Linux-x86_64-cuda-13.3-Release-external.tar.zst)
-   - [TensorRT 11.1.0.106 for CUDA 12.9, Linux x86_64](https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.1.0/tars/TensorRT-Enterprise-11.1.0.106-Linux-x86_64-cuda-12.9-Release-external.tar.zst)
-   - [TensorRT 11.1.0.106 for CUDA 13.3, Windows x86_64](https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.1.0/zip/TensorRT-Enterprise-11.1.0.106-Windows-amd64-cuda-13.3-Release-external.zip)
-   - [TensorRT 11.1.0.106 for CUDA 12.9, Windows x86_64](https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.1.0/zip/TensorRT-Enterprise-11.1.0.106-Windows-amd64-cuda-12.9-Release-external.zip)
+   - [TensorRT 11.2.1.2 for CUDA 13.3, Linux x86_64](https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.2.1/tars/TensorRT-Enterprise-11.2.1.2-Linux-x86_64-cuda-13.3-Release-external.tar.zst)
+   - [TensorRT 11.2.1.2 for CUDA 12.9, Linux x86_64](https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.2.1/tars/TensorRT-Enterprise-11.2.1.2-Linux-x86_64-cuda-12.9-Release-external.tar.zst)
+   - [TensorRT 11.2.1.2 for CUDA 13.3, Windows x86_64](https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.2.1/zip/TensorRT-Enterprise-11.2.1.2-Windows-amd64-cuda-13.3-Release-external.zip)
+   - [TensorRT 11.2.1.2 for CUDA 12.9, Windows x86_64](https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/11.2.1/zip/TensorRT-Enterprise-11.2.1.2-Windows-amd64-cuda-12.9-Release-external.zip)
 
    **Example: Ubuntu 22.04 on x86-64 with cuda-13.3**
 
    ```bash
    cd ~/Downloads
-   tar --zstd -xvf TensorRT-Enterprise-11.1.0.106-Linux-x86_64-cuda-13.3-Release-external.tar.zst
-   export TRT_LIBPATH=`pwd`/TensorRT-11.1.0.106/lib
+   tar --zstd -xvf TensorRT-Enterprise-11.2.1.2-Linux-x86_64-cuda-13.3-Release-external.tar.zst
+   export TRT_LIBPATH=`pwd`/TensorRT-11.2.1.2/lib
    ```
 
    **Example: Windows on x86-64 with cuda-12.9**
 
    ```powershell
-   Expand-Archive -Path TensorRT-Enterprise-11.1.0.106-Windows-amd64-cuda-12.9-Release-external.zip
-   $env:TRT_LIBPATH="$pwd\TensorRT-11.1.0.106\lib"
+   Expand-Archive -Path TensorRT-Enterprise-11.2.1.2-Windows-amd64-cuda-12.9-Release-external.zip
+   $env:TRT_LIBPATH="$pwd\TensorRT-11.2.1.2\lib"
    ```
 
 ## Setting Up The Build Environment

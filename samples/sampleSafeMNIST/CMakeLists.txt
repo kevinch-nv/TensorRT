@@ -26,12 +26,6 @@ if(NOT TRT_SAFETY_INFERENCE_ONLY)
     if(TARGET nvonnxparser)
         target_link_libraries(sample_mnist_safe_build PRIVATE nvonnxparser)
     endif()
-    if(TRT_OUT_DIR)
-        set_target_properties(sample_mnist_safe_build
-            PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${TRT_OUT_DIR}"
-        )
-    endif()
 
     add_dependencies(tensorrt_samples sample_mnist_safe_build)
 
@@ -59,13 +53,6 @@ else()
     target_link_libraries(sample_mnist_safe_infer PRIVATE
         trt_samples_common
         TRTSAFE::nvinfer_safe_shared
-    )
-endif()
-
-if(TRT_OUT_DIR)
-    set_target_properties(sample_mnist_safe_infer
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${TRT_OUT_DIR}"
     )
 endif()
 

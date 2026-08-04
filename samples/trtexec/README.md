@@ -68,7 +68,7 @@ Compile the sample by following build instructions in [TensorRT README](https://
 
 ### Example 1: Profiling a custom layer
 
-You can profile a custom layer, implemented as a [TensorRT plugin](https://github.com/NVIDIA/TensorRT/tree/main/plugin#tensorrt-plugins), by leveraging `trtexec`. Plugins need to be registered in the plugin registry (instance of `IPluginRegistry`) to be visible to TensorRT. `trtexec` will load the TensorRT standard plugin library (`libnvinfer_plugin.so` / `nvinfer_plugin.dll`) that provides plugin support to TensorRT. Checkout the [Non-Zero Plugins Sample](../sampleNonZeroPlugin/) for a quick sample, or the [Plugins section](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#extending) of the TensorRT Developer Guide for a more detailed walkthrough.
+You can profile a custom layer, implemented as a [TensorRT plugin](https://github.com/NVIDIA/TensorRT/tree/main/plugin#tensorrt-plugins), by leveraging `trtexec`. Plugins need to be registered in the plugin registry (instance of `IPluginRegistry`) to be visible to TensorRT. `trtexec` will load the TensorRT standard plugin library (`libnvinfer_plugin.so` / `nvinfer_plugin.dll`) that provides plugin support to TensorRT. Check out the [Non-Zero Plugins Sample](../sampleNonZeroPlugin/) for a quick sample, or the [Plugins section](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/extending-custom-layers.html) of the TensorRT Developer Guide for a more detailed walkthrough.
 
 Plugins can be used with `trtexec` in the following 2 ways:
 
@@ -83,7 +83,7 @@ Plugins can be used with `trtexec` in the following 2 ways:
 <summary> Using your own Plugin  </summary>
 
   - If you want to define your own plugin and have `trtexec` use it as part of the network, you should define your own _Plugin Shared library_ with specific entry-points recognized by TensorRT. Then, provide the shared plugin library path to `trtexec` using the `--dynamicPlugins` flag.
-  - More information on Plugin Shared Libraries and how to define them can be seen in the [Plugin Shared Libraries](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#plugin-serialization) section of the [TensorRT Developer Guide](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html).
+  - More information on Plugin Shared Libraries and how to define them can be seen in the [Plugin Shared Libraries](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/plugins-api-migration.html#plugin-serialization-deserialization) section of the [TensorRT Developer Guide](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html).
 
     In summary, there are two methods:
     1. The `REGISTER_TENSORRT_PLUGIN` macro can be applied to the plugin creator for each plugin that needs to be statically registered. i.e. Registered at load-time of the plugin library.
@@ -115,7 +115,7 @@ To run the MNIST network on DLA using `trtexec`, issue:
 ./trtexec --onnx=data/mnist/mnist.onnx --useDLACore=0 --fp16 --allowGPUFallback
 ```
 
-For more information about DLA, see [Working With DLA](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#dla_topic).
+For more information about DLA, see [Working With DLA](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/work-with-dla.html).
 
 ### Example 3: Running an ONNX model with full dimensions and dynamic shapes
 
@@ -443,20 +443,20 @@ A few things to keep in mind when relying on a tuning result in production:
 
 To see the full list of available options and their descriptions, issue the `./trtexec --help` command.
 
-**Note:** Specifying the `--safe` parameter turns the safety mode switch `ON`. By default, the `--safe` parameter is not specified; the safety mode switch is `OFF`. The layers and parameters that are contained within the `--safe` subset are restricted if the switch is set to `ON`. The switch is used for prototyping the safety restricted flows until the TensorRT safety runtime is made available. This parameter is required when loading or saving safe engines with the standard TensorRT package. For more information, see the [Working With Automotive Safety section in the TensorRT Developer Guide](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#working_auto_safety).
+**Note:** Specifying the `--safe` parameter turns the safety mode switch `ON`. By default, the `--safe` parameter is not specified; the safety mode switch is `OFF`. The layers and parameters that are contained within the `--safe` subset are restricted if the switch is set to `ON`. The switch is used for prototyping the safety restricted flows until the TensorRT safety runtime is made available. This parameter is required when loading or saving safe engines with the standard TensorRT package. For more information, see the [Working With Automotive Safety section in the TensorRT Developer Guide](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html).
 
 ## Additional resources
 
 The following resources provide more details about `trtexec`:
 
 **Documentation**
-- [NVIDIA trtexec](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#trtexec)
-- [TensorRT Sample Support Guide](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [NVIDIA trtexec](https://docs.nvidia.com/deeplearning/tensorrt/latest/performance/benchmarking.html#trtexec)
+- [TensorRT Sample Support Guide](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 # License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html)
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html)
 documentation.
 
 # Changelog

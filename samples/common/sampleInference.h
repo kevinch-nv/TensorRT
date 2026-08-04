@@ -249,6 +249,7 @@ inline nvinfer1::IExecutionContext* InferenceEnvironmentStd::getContext(int32_t 
 //!
 bool setUpInference(InferenceEnvironmentBase& iEnv, InferenceOptions const& inference, SystemOptions const& system);
 
+
 #if ENABLE_UNIFIED_BUILDER
 //!
 //! \brief Set up graphs and bindings for safe inference

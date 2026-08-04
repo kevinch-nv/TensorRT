@@ -89,6 +89,12 @@ if (${TRT_BUILD_TESTING})
     )
 
     gtest_discover_tests(trt_samples_common_test DISCOVERY_MODE ${TRT_GTEST_DISCOVERY_MODE})
+
+    if(NOT ${TRT_BUILD_SAMPLES})
+        set_target_properties(trt_samples_common_test PROPERTIES
+            EXCLUDE_FROM_ALL TRUE
+        )
+    endif()
 endif() # TRT_BUILD_TESTING
 
 target_include_directories(trt_samples_common PUBLIC

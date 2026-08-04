@@ -22,6 +22,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -29,7 +30,9 @@
 #include <string>
 #include <string_view>
 #include <thread>
+#if !defined(_WIN32)
 #include <unistd.h>
+#endif
 #include <vector>
 
 #include "NvInfer.h"
@@ -48,7 +51,22 @@ using namespace sample;
 using namespace samplesCommon;
 
 // MD code start
+// On Windows, NCCL is loaded at runtime via LoadLibrary so the build does not
+// depend on the NCCL Conan package. We forward-declare the minimal API surface
+// the sample uses and bind to the actual symbols in initNccl() below.
+#if defined(_WIN32)
+typedef enum { ncclSuccess = 0 } ncclResult_t;
+typedef struct { char internal[128]; } ncclUniqueId;
+typedef struct ncclComm* ncclComm_t;
+#else
 #include <nccl.h>
+#endif
+
+//! Function pointers to NCCL APIs. On Linux these are bound to the linked
+//! symbols; on Windows they are loaded from nccl.dll via LoadLibrary.
+std::function<ncclResult_t(ncclUniqueId*)> pNcclGetUniqueId{};
+std::function<ncclResult_t(ncclComm_t*, int, ncclUniqueId, int)> pNcclCommInitRank{};
+std::function<ncclResult_t(ncclComm_t)> pNcclCommDestroy{};
 // MD code end
 
 using namespace std;
@@ -177,6 +195,28 @@ bool initNvonnxparser()
     pCreateNvOnnxRefitterInternal = createNvOnnxParserRefitter_INTERNAL;
     return true;
 #endif // !TRT_STATIC
+}
+
+//! Bind NCCL function pointers. On Linux NCCL is linked statically; on Windows
+//! it is loaded from nccl.dll at runtime so the build can avoid the NCCL Conan
+//! dependency.
+bool initNccl()
+{
+#if defined(_WIN32)
+    static LibraryPtr libncclPtr{};
+    auto fetchPtrs = [](DynamicLibrary* l) {
+        pNcclGetUniqueId = l->symbolAddress<ncclResult_t(ncclUniqueId*)>("ncclGetUniqueId");
+        pNcclCommInitRank
+            = l->symbolAddress<ncclResult_t(ncclComm_t*, int, ncclUniqueId, int)>("ncclCommInitRank");
+        pNcclCommDestroy = l->symbolAddress<ncclResult_t(ncclComm_t)>("ncclCommDestroy");
+    };
+    return initLibrary(libncclPtr, "nccl.dll", fetchPtrs);
+#else
+    pNcclGetUniqueId = ::ncclGetUniqueId;
+    pNcclCommInitRank = ::ncclCommInitRank;
+    pNcclCommDestroy = ::ncclCommDestroy;
+    return true;
+#endif
 }
 
 [[nodiscard]] std::string toString(CollectiveOperation op)
@@ -410,7 +450,7 @@ void printUsage(char const* programName)
 
         // Generate NCCL ID and write to file
         ncclUniqueId id;
-        NCCLCHECK(ncclGetUniqueId(&id));
+        NCCLCHECK(pNcclGetUniqueId(&id));
 
         std::string const hexStr = ncclIdToHex(id);
 
@@ -806,7 +846,7 @@ void runCollectiveTest(int32_t rank, int32_t worldSize, CollectiveOperation op)
     // Set up NCCL - rank 0 generates ID and writes to file, others read from file
     ncclUniqueId const id = getNcclIdViaFile(rank);
     ncclComm_t comm;
-    NCCLCHECK(ncclCommInitRank(&comm, worldSize, id, rank));
+    NCCLCHECK(pNcclCommInitRank(&comm, worldSize, id, rank));
 
     // Get test configuration for the specified operation
     CollectiveTestConfig const config = getTestConfig(op, worldSize);
@@ -816,7 +856,7 @@ void runCollectiveTest(int32_t rank, int32_t worldSize, CollectiveOperation op)
 
     sample::gLogInfo << "Rank " << rank << " - " << toString(op) << " test completed successfully!" << std::endl;
 
-    NCCLCHECK(ncclCommDestroy(comm));
+    NCCLCHECK(pNcclCommDestroy(comm));
     CHECK_CUDA(cudaStreamDestroy(stream));
 }
 
@@ -883,6 +923,15 @@ int main(int argc, char* argv[])
                               << std::endl;
             sample::gLogError << "Please set TRT_WORLD_SIZE=2 and launch 2 processes." << std::endl;
             sample::gLogError << "Run with --help for example commands." << std::endl;
+        }
+        return 1;
+    }
+
+    if (!initNccl())
+    {
+        if (rank == 0)
+        {
+            sample::gLogError << "Failed to initialize NCCL." << std::endl;
         }
         return 1;
     }

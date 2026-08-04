@@ -30,13 +30,6 @@ else()
     target_link_libraries(trtexec_safe PRIVATE trt_samples_common TRTSAFE::nvinfer_safe_debug)
 endif()
 
-if(TRT_OUT_DIR)
-    set_target_properties(trtexec_safe
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${TRT_OUT_DIR}"
-    )
-endif()
-
 add_dependencies(tensorrt_samples trtexec_safe)
 
 installLibraries(

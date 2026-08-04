@@ -62,33 +62,33 @@ After you build the engine, verify that the engine is running properly by confir
 
 ### Running inference
 
-To run inference using the created engine, see [Performing Inference In C++](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#perform_inference_c).
+To run inference using the created engine, see [Performing Inference In C++](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html#perform-inference-c).
 
 **Note:** It’s important to preprocess the data and convert it to the format accepted by the network. In this example, the sample input is in PGM (portable graymap) format. The model expects an input of image `1x28x28` scaled to between `[0,1]`.
 
 ### TensorRT API layers and ops
 
-In this sample, the following layers are used. For more information about these layers, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#layers) documentation.
+In this sample, the following layers are used. For more information about these layers, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/tensorrt/latest/api/operators.html) documentation.
 
-[Activation layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#activation-layer)
+[Activation layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Activation.html)
 The Activation layer implements element-wise activation functions. Specifically, this sample uses the Activation layer with the type `kRELU`.
 
-[Convolution layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#convolution-layer)
+[Convolution layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Convolution.html)
 The Convolution layer computes a 2D (channel, height, and width) convolution, with or without bias.
 
-[MatrixMultiplyLayer](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#matrixmultiply-layer)
+[MatrixMultiplyLayer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/MatrixMultiply.html)
 The MatrixMultiply layer implements a matrix multiplication operation.
-(The [FullyConnected layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#fullyconnected-layer) is deprecated since 8.4.
+(The [FullyConnected layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/MatrixMultiply.html) is deprecated since 8.4.
 The bias of a FullyConnected layer can be added with an
-[ElementwiseLayer](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#elementwise-layer) of `SUM` operation.)
+[ElementwiseLayer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/ElementWise.html) of `SUM` operation.)
 
-[Pooling layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#pooling-layer)
+[Pooling layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Pooling.html)
 The Pooling layer implements pooling within a channel. Supported pooling types are `maximum`, `average` and `maximum-average blend`.
 
-[Scale layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#scale-layer)
+[Scale layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Scale.html)
 The Scale layer implements a per-tensor, per-channel, or per-element affine transformation and/or exponentiation by constant values.
 
-[Shuffle layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#shuffle-layer)
+[Shuffle layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Shuffle.html)
 The Shuffle layer implements a reshape and transpose operator for tensors.
 
 ## Prerequisites
@@ -184,13 +184,13 @@ The following resources provide a deeper understanding about the ONNX project an
 - [GitHub: ONNX Models](https://github.com/onnx/models)
 
 **Documentation**
-- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#c_topics)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 # License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 
 # Changelog

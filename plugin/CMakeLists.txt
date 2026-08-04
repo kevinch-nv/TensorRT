@@ -19,7 +19,7 @@ include(ShouldCompileKernel)
 
 option(TRT_BUILD_INCLUDE_BERT_QKV_PLUGIN "Build the BERT QKV to Context Plugin and related plugins." ON)
 
-# Create the main object library, which is shared between plugin, plugin_internal, and plugin_static.
+# Create the main object library, which is shared between plugin, and plugin_static.
 add_library(trt_plugins OBJECT)
 function(add_plugin_source)
     target_sources(trt_plugins PRIVATE ${ARGN})
@@ -37,6 +37,7 @@ set(TRT_PLUGIN_NAMES
     detectionLayerPlugin
     disentangledAttentionPlugin
     efficientNMSPlugin
+    fftPlugin
     flattenConcat
     generateDetectionPlugin
     gridAnchorPlugin

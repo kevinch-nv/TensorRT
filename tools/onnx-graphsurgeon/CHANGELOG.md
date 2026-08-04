@@ -3,7 +3,7 @@
 Dates are in YYYY-MM-DD format.
 
 
-## vNext
+## v0.6.2 (2026-05-21)
 
 ### Added
 - Added support for `FLOAT4E2M1` tensors and upgraded ONNX version to >= 1.20

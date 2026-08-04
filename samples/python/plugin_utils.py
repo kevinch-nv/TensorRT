@@ -52,7 +52,7 @@ def getComputeCapacity(devID):
     return (major, minor)
 
 
-# Taken from https://github.com/NVIDIA/cuda-python/blob/main/examples/common/common.py
+# Taken from https://github.com/NVIDIA/cuda-python
 class KernelHelper:
     def __init__(self, code, devID):
         prog = cuda_call(

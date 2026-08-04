@@ -19,7 +19,7 @@
 
 ## Description
 
-This sample, sampleDynamicReshape, demonstrates how to use dynamic input dimensions in TensorRT. It creates an engine that takes a dynamically shaped input and resizes it to be consumed by an ONNX MNIST model that expects a fixed size input. For more information, see [Working With Dynamic Shapes](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#work_dynamic_shapes) in the TensorRT Developer Guide.
+This sample, sampleDynamicReshape, demonstrates how to use dynamic input dimensions in TensorRT. It creates an engine that takes a dynamically shaped input and resizes it to be consumed by an ONNX MNIST model that expects a fixed size input. For more information, see [Working With Dynamic Shapes](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/work-with-dynamic-shapes.html) in the TensorRT Developer Guide.
 
 ## How does this sample work?
 
@@ -149,9 +149,9 @@ CHECK(cudaMemcpy(mOutput.hostBuffer.data(), mOutput.deviceBuffer.data(), mOutput
 
 ### TensorRT API layers and ops
 
-In this sample, the following layers are used. For more information about these layers, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#layers) documentation.
+In this sample, the following layers are used. For more information about these layers, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/tensorrt/latest/api/operators.html) documentation.
 
-[Resize layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#resize-layer)
+[Resize layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Resize.html)
 The IResizeLayer implements the resize operation on an input tensor.
 
 ## Prerequisites
@@ -257,13 +257,13 @@ The following resources provide a deeper understanding of dynamic shapes.
 - [GitHub: ONNX Models](https://github.com/onnx/models)
 
 **Documentation**
-- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The Python API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#python_topics)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The Python API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/python-api-docs.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 # License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 
 # Changelog

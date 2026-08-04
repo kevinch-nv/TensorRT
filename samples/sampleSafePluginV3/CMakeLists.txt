@@ -33,12 +33,6 @@ if(NOT TRT_SAFETY_INFERENCE_ONLY)
     if(TARGET nvonnxparser)
         target_link_libraries(sample_plugin_safe_build PRIVATE nvonnxparser)
     endif()
-    if(TRT_OUT_DIR)
-        set_target_properties(sample_plugin_safe_build
-            PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${TRT_OUT_DIR}"
-        )
-    endif()
 
     add_dependencies(tensorrt_samples sample_plugin_safe_build)
 
@@ -65,13 +59,6 @@ else()
     target_link_libraries(sample_plugin_safe_infer PRIVATE
         trt_samples_common
         TRTSAFE::nvinfer_safe_shared
-    )
-endif()
-
-if(TRT_OUT_DIR)
-    set_target_properties(sample_plugin_safe_infer
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${TRT_OUT_DIR}"
     )
 endif()
 
@@ -118,16 +105,9 @@ if(NOT TRT_SAFETY_INFERENCE_ONLY)
         ${CMAKE_CURRENT_SOURCE_DIR}/../common
     )
 
-    if(TRT_OUT_DIR)
-        set_target_properties(sample_safe_plugin_build_lib PROPERTIES
-            OUTPUT_NAME "sample_safe_plugin_v3"
-            LIBRARY_OUTPUT_DIRECTORY "${TRT_OUT_DIR}"
-        )
-    else()
-        set_target_properties(sample_safe_plugin_build_lib PROPERTIES
-            OUTPUT_NAME "sample_safe_plugin_v3"
-        )
-    endif()
+    set_target_properties(sample_safe_plugin_build_lib PROPERTIES
+        OUTPUT_NAME "sample_safe_plugin_v3"
+    )
 
     add_dependencies(tensorrt_samples sample_safe_plugin_build_lib)
 
@@ -162,16 +142,9 @@ else()
     )
 endif()
 
-if(TRT_OUT_DIR)
-    set_target_properties(sample_safe_plugin_runtime_lib PROPERTIES
-        OUTPUT_NAME "sample_safe_plugin_v3_safe"
-        LIBRARY_OUTPUT_DIRECTORY "${TRT_OUT_DIR}"
-    )
-else()
-    set_target_properties(sample_safe_plugin_runtime_lib PROPERTIES
-        OUTPUT_NAME "sample_safe_plugin_v3_safe"
-    )
-endif()
+set_target_properties(sample_safe_plugin_runtime_lib PROPERTIES
+    OUTPUT_NAME "sample_safe_plugin_v3_safe"
+)
 
 add_dependencies(tensorrt_samples sample_safe_plugin_runtime_lib)
 

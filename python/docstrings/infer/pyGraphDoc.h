@@ -705,7 +705,7 @@ constexpr char const* descr = R"trtdoc(
     This class shuffles data by applying in sequence: a transpose operation, a reshape operation and a second transpose operation. The dimension types of the output are those of the reshape dimension.
 
     :ivar first_transpose: :class:`Permutation` The permutation applied by the first transpose operation. Default: Identity Permutation
-    :ivar reshape_dims: :class:`Dims` The reshaped dimensions.
+    :ivar reshape_dims: :class:`Dims` The reshaped dimensions, or ``None`` if they are specified dynamically through a second layer input instead.
         Two special values can be used as dimensions.
         Value 0 copies the corresponding dimension from input. This special value can be used more than once in the dimensions. If number of reshape dimensions is less than input, 0s are resolved by aligning the most significant dimensions of input.
         Value -1 infers that particular dimension by looking at input and rest of the reshape dimensions. Note that only a maximum of one dimension is permitted to be specified as -1.
@@ -795,11 +795,11 @@ constexpr char const* descr = R"trtdoc(
     * The input tensor has four dimensions.
     * For :const:`SliceMode.FILL` , the fill value input is a scalar output of an :class:`IConstantLayer` with value 0 that is not consumed by any other layer.
 
-    :ivar start: :class:`Dims` The start offset.
-    :ivar shape: :class:`Dims` The output dimensions.
-    :ivar stride: :class:`Dims` The slicing stride.
+    :ivar start: :class:`Dims` The start offset, or ``None`` if it is specified dynamically through a layer input instead.
+    :ivar shape: :class:`Dims` The output dimensions, or ``None`` if they are specified dynamically through a layer input instead.
+    :ivar stride: :class:`Dims` The slicing stride, or ``None`` if it is specified dynamically through a layer input instead.
     :ivar mode: :class:`SampleMode` Controls how :class:`ISliceLayer` handles out of bounds coordinates.
-    :ivar axes: :class:`Dims` The axes that starts, sizes, and strides correspond to.
+    :ivar axes: :class:`Dims` The axes that starts, sizes, and strides correspond to, or ``None`` if they are specified dynamically through a layer input instead.
 )trtdoc";
 
 constexpr char const* set_input = R"trtdoc(
@@ -1103,7 +1103,7 @@ constexpr char const* descr = R"trtdoc(
        * (ResizeCoordinateTransformation.HALF_PIXEL, ResizeSelector.UPPER)
 
 
-    :ivar shape: :class:`Dims` The output dimensions. Must to equal to input dimensions size.
+    :ivar shape: :class:`Dims` The output dimensions, or ``None`` if they are specified dynamically through a second layer input or via scales instead. Must be equal to the input dimensions size.
     :ivar scales: :class:`List[float]` List of resize scales.
         If executing this layer on DLA, there are three restrictions:
         1. ``len(scales)`` has to be exactly 4.
@@ -1350,7 +1350,7 @@ constexpr char const* descr = R"trtdoc(
     A grid sample layer in an :class:`INetworkDefinition` .
 
     This layer uses an input tensor and a grid tensor to produce an interpolated output tensor.
-    The input and grid tensors must shape tensors of rank 4. The only supported `SampleMode` s are
+    The input and grid tensors must be tensors of rank 4 or 5. The only supported `SampleMode` s are
     trt.samplemode.CLAMP, trt.samplemode.FILL, and trt.samplemode.REFLECT.
 
     :ivar interpolation_mode: class:`InterpolationMode` The interpolation type to use. Defaults to LINEAR.
@@ -2709,7 +2709,7 @@ constexpr char const* add_assertion = R"trtdoc(
 )trtdoc";
 
 constexpr char const* add_grid_sample = R"trtdoc(
-    Creates a GridSample layer with a trt.InterpolationMode.LINEAR, unaligned corners, and trt.SampleMode.FILL for 4d-shape input tensors.
+    Creates a GridSample layer with a trt.InterpolationMode.LINEAR, unaligned corners, and trt.SampleMode.FILL for rank 4 or 5 input tensors.
     See :class:`IGridSampleLayer` for more information.
 
     :arg input: The input tensor to the layer.

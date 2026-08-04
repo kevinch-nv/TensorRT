@@ -287,7 +287,7 @@ IPluginV2DynamicExt* ScatterElementsPluginV2Creator::createPlugin(
             }
         }
 
-        PLUGIN_VALIDATE(kREDUCE_STR_TO_ENUM.find(reductionArg) != kREDUCE_STR_TO_ENUM.end(),
+        PLUGIN_VALIDATE(kREDUCE_STR_TO_ENUM.contains(reductionArg),
             (reductionArg + ": invalid value for 'reduction' plugin argument").c_str());
 
         auto plugin = std::make_unique<ScatterElementsPluginV2>(reductionArg, axisArg);

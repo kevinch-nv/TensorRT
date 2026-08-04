@@ -71,8 +71,8 @@ target_include_directories(customHardmaxPlugin PRIVATE
     ${CUDAToolkit_INCLUDE_DIRS} ${TRT_INCLUDE} ${CMAKE_SOURCE_DIR_REALPATH}/plugin/
     ${SAMPLES_COMMON_DIR} ${SAMPLES_DIR} ${SHARED_DIR})
 
-# Use C++11
-target_compile_features(customHardmaxPlugin PUBLIC cxx_std_17)
+# std::ranges used in samples/common requires C++20 (TRT-27982)
+target_compile_features(customHardmaxPlugin PUBLIC cxx_std_20)
 
 # Link TensorRT’s nvinfer lib
 target_link_libraries(customHardmaxPlugin PRIVATE ${NVINFER_LIB})

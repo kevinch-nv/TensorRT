@@ -19,27 +19,27 @@ This sample, `network_api_pytorch_mnist`, trains a convolutional model on the [M
 
 ## How does this sample work?
 
-This sample is an end-to-end sample that trains a model in PyTorch, recreates the network in TensorRT, imports weights from the trained model, and finally runs inference with a TensorRT engine. For more information, see [Creating A Network Definition In Python](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#network_python).
+This sample is an end-to-end sample that trains a model in PyTorch, recreates the network in TensorRT, imports weights from the trained model, and finally runs inference with a TensorRT engine. For more information, see [Creating A Network Definition In Python](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/python-api-docs.html#create-network-python).
 
 The `sample.py` script imports the functions from the `mnist.py` script for training the PyTorch model, as well as retrieving test cases from the PyTorch Data Loader.
 
 ### TensorRT API layers and ops
 
-In this sample, the following layers are used. For more information about these layers, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#layers) documentation.
+In this sample, the following layers are used. For more information about these layers, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/tensorrt/latest/api/operators.html) documentation.
 
-[Activation layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#activation-layer)
+[Activation layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Activation.html)
 The Activation layer implements element-wise activation functions. Specifically, this sample uses the Activation layer with the type `RELU`.
 
-[Convolution layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#convolution-layer)
+[Convolution layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Convolution.html)
 The Convolution layer computes a 2D (channel, height, and width) convolution, with or without bias.
 
-[MatrixMultiplyLayer](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#matrixmultiply-layer)
+[MatrixMultiplyLayer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/MatrixMultiply.html)
 The MatrixMultiply layer implements a matrix multiplication.
-(The [FullyConnected layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#fullyconnected-layer) is deprecated since 8.4.
+(The [FullyConnected layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/MatrixMultiply.html) is deprecated since 8.4.
 The bias of FullyConnected semantic can be added with an
-[ElementwiseLayer](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#elementwise-layer) of `SUM` operation.)
+[ElementwiseLayer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/ElementWise.html) of `SUM` operation.)
 
-[Pooling layer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#pooling-layer)
+[Pooling layer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/operators/Pooling.html)
 The Pooling layer implements pooling within a channel. Supported pooling types are `maximum`, `average` and `maximum-average blend`.
 
 ## Prerequisites
@@ -86,13 +86,13 @@ The following resources provide a deeper understanding about getting started wit
 - [MNIST database](https://ossci-datasets.s3.amazonaws.com/mnist/)
 
 **Documentation**
-- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The Python API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#python_topics)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Introduction To NVIDIA’s TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The Python API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/python-api-docs.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 # License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 # Changelog
 October 2025

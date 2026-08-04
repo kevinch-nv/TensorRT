@@ -408,7 +408,8 @@ namespace tensorrt
         // ITensor
         py::class_<ITensor, std::unique_ptr<ITensor, py::nodelete>>(m, "ITensor", ITensorDoc::descr, py::module_local())
             .def_property("name", &ITensor::getName, &ITensor::setName)
-            .def_property("shape", &ITensor::getDimensions, &ITensor::setDimensions)
+            .def_property("shape", utils::throwingDimsGetter(&ITensor::getDimensions, "tensor shape"),
+                &ITensor::setDimensions)
             .def_property_readonly("dtype", &ITensor::getType)
             .def_property("broadcast_across_batch", utils::deprecateMember(&ITensor::getBroadcastAcrossBatch, "Implicit batch dimensions support has been removed"), utils::deprecateMember(&ITensor::setBroadcastAcrossBatch, "Implicit batch dimensions support has been removed"))
             .def_property("location", &ITensor::getLocation, &ITensor::setLocation)
@@ -447,17 +448,24 @@ namespace tensorrt
 
         py::class_<IConvolutionLayer, ILayer, std::unique_ptr<IConvolutionLayer, py::nodelete>>(m, "IConvolutionLayer", IConvolutionLayerDoc::descr, py::module_local())
             .def_property("num_output_maps", &IConvolutionLayer::getNbOutputMaps, &IConvolutionLayer::setNbOutputMaps)
-            .def_property("pre_padding", &IConvolutionLayer::getPrePadding, &IConvolutionLayer::setPrePadding)
-            .def_property("post_padding", &IConvolutionLayer::getPostPadding, &IConvolutionLayer::setPostPadding)
+            .def_property("pre_padding", utils::throwingDimsGetter(&IConvolutionLayer::getPrePadding, "pre_padding"),
+                &IConvolutionLayer::setPrePadding)
+            .def_property("post_padding", utils::throwingDimsGetter(&IConvolutionLayer::getPostPadding, "post_padding"),
+                &IConvolutionLayer::setPostPadding)
             .def_property("padding_mode", &IConvolutionLayer::getPaddingMode, &IConvolutionLayer::setPaddingMode)
             .def_property("num_groups", &IConvolutionLayer::getNbGroups, &IConvolutionLayer::setNbGroups)
             // Return numpy arrays instead of weights.
             .def_property("kernel", lambdas::conv_get_kernel, py::cpp_function(&IConvolutionLayer::setKernelWeights, py::keep_alive<1, 2>{}))
             .def_property("bias", lambdas::conv_get_bias, py::cpp_function(&IConvolutionLayer::setBiasWeights, py::keep_alive<1, 2>{}))
-            .def_property("kernel_size_nd", &IConvolutionLayer::getKernelSizeNd, &IConvolutionLayer::setKernelSizeNd)
-            .def_property("stride_nd", &IConvolutionLayer::getStrideNd, &IConvolutionLayer::setStrideNd)
-            .def_property("padding_nd", &IConvolutionLayer::getPaddingNd, &IConvolutionLayer::setPaddingNd)
-            .def_property("dilation_nd", &IConvolutionLayer::getDilationNd, &IConvolutionLayer::setDilationNd)
+            .def_property("kernel_size_nd",
+                utils::throwingDimsGetter(&IConvolutionLayer::getKernelSizeNd, "kernel_size_nd"),
+                &IConvolutionLayer::setKernelSizeNd)
+            .def_property("stride_nd", utils::throwingDimsGetter(&IConvolutionLayer::getStrideNd, "stride_nd"),
+                &IConvolutionLayer::setStrideNd)
+            .def_property("padding_nd", utils::throwingDimsGetter(&IConvolutionLayer::getPaddingNd, "padding_nd"),
+                &IConvolutionLayer::setPaddingNd)
+            .def_property("dilation_nd", utils::throwingDimsGetter(&IConvolutionLayer::getDilationNd, "dilation_nd"),
+                &IConvolutionLayer::setDilationNd)
         ;
 
         // Bind to a Python enum called ActivationType.
@@ -493,14 +501,19 @@ namespace tensorrt
 
         py::class_<IPoolingLayer, ILayer, std::unique_ptr<IPoolingLayer, py::nodelete>>(m, "IPoolingLayer", IPoolingLayerDoc::descr, py::module_local())
             .def_property("type", &IPoolingLayer::getPoolingType, &IPoolingLayer::setPoolingType)
-            .def_property("pre_padding", &IPoolingLayer::getPrePadding, &IPoolingLayer::setPrePadding)
-            .def_property("post_padding", &IPoolingLayer::getPostPadding, &IPoolingLayer::setPostPadding)
+            .def_property("pre_padding", utils::throwingDimsGetter(&IPoolingLayer::getPrePadding, "pre_padding"),
+                &IPoolingLayer::setPrePadding)
+            .def_property("post_padding", utils::throwingDimsGetter(&IPoolingLayer::getPostPadding, "post_padding"),
+                &IPoolingLayer::setPostPadding)
             .def_property("padding_mode", &IPoolingLayer::getPaddingMode, &IPoolingLayer::setPaddingMode)
             .def_property("blend_factor", &IPoolingLayer::getBlendFactor, &IPoolingLayer::setBlendFactor)
             .def_property("average_count_excludes_padding", &IPoolingLayer::getAverageCountExcludesPadding, &IPoolingLayer::setAverageCountExcludesPadding)
-            .def_property("window_size_nd", &IPoolingLayer::getWindowSizeNd, &IPoolingLayer::setWindowSizeNd)
-            .def_property("stride_nd", &IPoolingLayer::getStrideNd, &IPoolingLayer::setStrideNd)
-            .def_property("padding_nd", &IPoolingLayer::getPaddingNd, &IPoolingLayer::setPaddingNd)
+            .def_property("window_size_nd", utils::throwingDimsGetter(&IPoolingLayer::getWindowSizeNd, "window_size_nd"),
+                &IPoolingLayer::setWindowSizeNd)
+            .def_property("stride_nd", utils::throwingDimsGetter(&IPoolingLayer::getStrideNd, "stride_nd"),
+                &IPoolingLayer::setStrideNd)
+            .def_property("padding_nd", utils::throwingDimsGetter(&IPoolingLayer::getPaddingNd, "padding_nd"),
+                &IPoolingLayer::setPaddingNd)
         ;
 
         py::class_<ILRNLayer, ILayer, std::unique_ptr<ILRNLayer, py::nodelete>>(m, "ILRNLayer", ILRNLayerDoc::descr, py::module_local())
@@ -527,19 +540,23 @@ namespace tensorrt
 
         py::class_<IQuantizeLayer, ILayer, std::unique_ptr<IQuantizeLayer, py::nodelete>>(m, "IQuantizeLayer", IQuantizeLayerDoc::descr, py::module_local())
             .def_property("axis", &IQuantizeLayer::getAxis, &IQuantizeLayer::setAxis)
-            .def_property("block_shape", &IQuantizeLayer::getBlockShape, &IQuantizeLayer::setBlockShape)
+            .def_property("block_shape", utils::throwingDimsGetter(&IQuantizeLayer::getBlockShape, "block_shape"),
+                &IQuantizeLayer::setBlockShape)
             .def_property("to_type", &IQuantizeLayer::getToType, &IQuantizeLayer::setToType)
         ;
 
         py::class_<IDequantizeLayer, ILayer, std::unique_ptr<IDequantizeLayer, py::nodelete>>(m, "IDequantizeLayer", IDequantizeLayerDoc::descr, py::module_local())
             .def_property("axis", &IDequantizeLayer::getAxis, &IDequantizeLayer::setAxis)
-            .def_property("block_shape", &IDequantizeLayer::getBlockShape, &IDequantizeLayer::setBlockShape)
+            .def_property("block_shape", utils::throwingDimsGetter(&IDequantizeLayer::getBlockShape, "block_shape"),
+                &IDequantizeLayer::setBlockShape)
             .def_property("to_type", &IDequantizeLayer::getToType, &IDequantizeLayer::setToType)
         ;
         py::class_<IDynamicQuantizeLayer, ILayer, std::unique_ptr<IDynamicQuantizeLayer, py::nodelete>>(m, "IDynamicQuantizeLayer", IDynamicQuantizeLayerDoc::descr, py::module_local())
             .def_property("axis", &IDynamicQuantizeLayer::getAxis, &IDynamicQuantizeLayer::setAxis)
             .def_property("block_size", &IDynamicQuantizeLayer::getBlockSize, &IDynamicQuantizeLayer::setBlockSize)
-            .def_property("block_shape", &IDynamicQuantizeLayer::getBlockShape, &IDynamicQuantizeLayer::setBlockShape)
+            .def_property("block_shape",
+                utils::throwingDimsGetter(&IDynamicQuantizeLayer::getBlockShape, "block_shape"),
+                &IDynamicQuantizeLayer::setBlockShape)
             .def_property("to_type", &IDynamicQuantizeLayer::getToType, &IDynamicQuantizeLayer::setToType)
             .def_property("scale_type", &IDynamicQuantizeLayer::getScaleType, &IDynamicQuantizeLayer::setScaleType)
         ;
@@ -555,16 +572,24 @@ namespace tensorrt
 
         py::class_<IDeconvolutionLayer, ILayer, std::unique_ptr<IDeconvolutionLayer, py::nodelete>>(m, "IDeconvolutionLayer", IDeconvolutionLayerDoc::descr, py::module_local())
             .def_property("num_output_maps", &IDeconvolutionLayer::getNbOutputMaps, &IDeconvolutionLayer::setNbOutputMaps)
-            .def_property("pre_padding", &IDeconvolutionLayer::getPrePadding, &IDeconvolutionLayer::setPrePadding)
-            .def_property("post_padding", &IDeconvolutionLayer::getPostPadding, &IDeconvolutionLayer::setPostPadding)
+            .def_property("pre_padding", utils::throwingDimsGetter(&IDeconvolutionLayer::getPrePadding, "pre_padding"),
+                &IDeconvolutionLayer::setPrePadding)
+            .def_property("post_padding",
+                utils::throwingDimsGetter(&IDeconvolutionLayer::getPostPadding, "post_padding"),
+                &IDeconvolutionLayer::setPostPadding)
             .def_property("padding_mode", &IDeconvolutionLayer::getPaddingMode, &IDeconvolutionLayer::setPaddingMode)
             .def_property("num_groups", &IDeconvolutionLayer::getNbGroups, &IDeconvolutionLayer::setNbGroups)
             .def_property("kernel", lambdas::deconv_get_kernel, py::cpp_function(&IDeconvolutionLayer::setKernelWeights, py::keep_alive<1, 2>{}))
             .def_property("bias", lambdas::deconv_get_bias, py::cpp_function(&IDeconvolutionLayer::setBiasWeights, py::keep_alive<1, 2>{}))
-            .def_property("kernel_size_nd", &IDeconvolutionLayer::getKernelSizeNd, &IDeconvolutionLayer::setKernelSizeNd)
-            .def_property("stride_nd", &IDeconvolutionLayer::getStrideNd, &IDeconvolutionLayer::setStrideNd)
-            .def_property("padding_nd", &IDeconvolutionLayer::getPaddingNd, &IDeconvolutionLayer::setPaddingNd)
-            .def_property("dilation_nd", &IDeconvolutionLayer::getDilationNd, &IDeconvolutionLayer::setDilationNd)
+            .def_property("kernel_size_nd",
+                utils::throwingDimsGetter(&IDeconvolutionLayer::getKernelSizeNd, "kernel_size_nd"),
+                &IDeconvolutionLayer::setKernelSizeNd)
+            .def_property("stride_nd", utils::throwingDimsGetter(&IDeconvolutionLayer::getStrideNd, "stride_nd"),
+                &IDeconvolutionLayer::setStrideNd)
+            .def_property("padding_nd", utils::throwingDimsGetter(&IDeconvolutionLayer::getPaddingNd, "padding_nd"),
+                &IDeconvolutionLayer::setPaddingNd)
+            .def_property("dilation_nd", utils::throwingDimsGetter(&IDeconvolutionLayer::getDilationNd, "dilation_nd"),
+                &IDeconvolutionLayer::setDilationNd)
         ;
 
         // Bind to a Python enum called ElementWiseOperation.
@@ -667,8 +692,12 @@ namespace tensorrt
         ;
 
         py::class_<IPaddingLayer, ILayer, std::unique_ptr<IPaddingLayer, py::nodelete>>(m, "IPaddingLayer", IPaddingLayerDoc::descr, py::module_local())
-            .def_property("pre_padding_nd", &IPaddingLayer::getPrePaddingNd, &IPaddingLayer::setPrePaddingNd)
-            .def_property("post_padding_nd", &IPaddingLayer::getPostPaddingNd, &IPaddingLayer::setPostPaddingNd)
+            .def_property("pre_padding_nd",
+                utils::throwingDimsGetter(&IPaddingLayer::getPrePaddingNd, "pre_padding_nd"),
+                &IPaddingLayer::setPrePaddingNd)
+            .def_property("post_padding_nd",
+                utils::throwingDimsGetter(&IPaddingLayer::getPostPaddingNd, "post_padding_nd"),
+                &IPaddingLayer::setPostPaddingNd)
         ;
 
         py::class_<Permutation>(m, "Permutation", PermutationDoc::descr, py::module_local())
@@ -688,19 +717,20 @@ namespace tensorrt
 
         py::class_<IShuffleLayer, ILayer, std::unique_ptr<IShuffleLayer, py::nodelete>>(m, "IShuffleLayer", IShuffleLayerDoc::descr, py::module_local())
             .def_property("first_transpose", &IShuffleLayer::getFirstTranspose, &IShuffleLayer::setFirstTranspose)
-            .def_property("reshape_dims", &IShuffleLayer::getReshapeDimensions, &IShuffleLayer::setReshapeDimensions)
+            .def_property("reshape_dims", utils::optionalDimsGetter(&IShuffleLayer::getReshapeDimensions),
+                &IShuffleLayer::setReshapeDimensions)
             .def_property("second_transpose", &IShuffleLayer::getSecondTranspose, &IShuffleLayer::setSecondTranspose)
             .def_property("zero_is_placeholder", &IShuffleLayer::getZeroIsPlaceholder, &IShuffleLayer::setZeroIsPlaceholder)
             .def("set_input", &IShuffleLayer::setInput, "index"_a, "tensor"_a, IShuffleLayerDoc::set_input)
         ;
 
         py::class_<ISliceLayer, ILayer, std::unique_ptr<ISliceLayer, py::nodelete>>(m, "ISliceLayer", ISliceLayerDoc::descr, py::module_local())
-            .def_property("start", &ISliceLayer::getStart, &ISliceLayer::setStart)
-            .def_property("shape", &ISliceLayer::getSize, &ISliceLayer::setSize)
-            .def_property("stride", &ISliceLayer::getStride, &ISliceLayer::setStride)
+            .def_property("start", utils::optionalDimsGetter(&ISliceLayer::getStart), &ISliceLayer::setStart)
+            .def_property("shape", utils::optionalDimsGetter(&ISliceLayer::getSize), &ISliceLayer::setSize)
+            .def_property("stride", utils::optionalDimsGetter(&ISliceLayer::getStride), &ISliceLayer::setStride)
             .def_property("mode", &ISliceLayer::getMode, &ISliceLayer::setMode)
             .def("set_input", &ISliceLayer::setInput, "index"_a, "tensor"_a, ISliceLayerDoc::set_input)
-            .def_property("axes", &ISliceLayer::getAxes, &ISliceLayer::setAxes)
+            .def_property("axes", utils::optionalDimsGetter(&ISliceLayer::getAxes), &ISliceLayer::setAxes)
         ;
 
         py::enum_<InterpolationMode>(m, "InterpolationMode", InterpolationModeDoc::descr, py::module_local())
@@ -764,7 +794,8 @@ namespace tensorrt
 
         py::class_<IConstantLayer, ILayer, std::unique_ptr<IConstantLayer, py::nodelete>>(m, "IConstantLayer", IConstantLayerDoc::descr, py::module_local())
             .def_property("weights", lambdas::constant_get_weights, py::cpp_function(&IConstantLayer::setWeights, py::keep_alive<1, 2>{}))
-            .def_property("shape", &IConstantLayer::getDimensions, &IConstantLayer::setDimensions)
+            .def_property("shape", utils::throwingDimsGetter(&IConstantLayer::getDimensions, "constant shape"),
+                &IConstantLayer::setDimensions)
         ;
 
         py::class_<IParametricReLULayer, ILayer, std::unique_ptr<IParametricReLULayer, py::nodelete>>(m, "IParametricReLULayer", IParametricReLULayerDoc::descr, py::module_local());
@@ -788,7 +819,8 @@ namespace tensorrt
         ; // ResizeRoundMode
 
         py::class_<IResizeLayer, ILayer, std::unique_ptr<IResizeLayer, py::nodelete>>(m, "IResizeLayer", IResizeLayerDoc::descr, py::module_local())
-            .def_property("shape", &IResizeLayer::getOutputDimensions, &IResizeLayer::setOutputDimensions)
+            .def_property("shape", utils::optionalDimsGetter(&IResizeLayer::getOutputDimensions),
+                &IResizeLayer::setOutputDimensions)
             .def_property("scales", lambdas::resize_get_scales, lambdas::resize_set_scales)
             .def_property("resize_mode", &IResizeLayer::getResizeMode, &IResizeLayer::setResizeMode)
             .def_property("coordinate_transformation", &IResizeLayer::getCoordinateTransformation, &IResizeLayer::setCoordinateTransformation)
@@ -874,7 +906,7 @@ namespace tensorrt
         ; // FillOperation
 
         py::class_<IFillLayer, ILayer, std::unique_ptr<IFillLayer, py::nodelete>>(m, "IFillLayer", IFillLayerDoc::descr, py::module_local())
-            .def_property("shape", &IFillLayer::getDimensions, &IFillLayer::setDimensions)
+            .def_property("shape", utils::optionalDimsGetter(&IFillLayer::getDimensions), &IFillLayer::setDimensions)
             .def_property("operation", &IFillLayer::getOperation, &IFillLayer::setOperation)
             .def_property("alpha", lambdas::get_alpha, lambdas::set_alpha)
             .def_property("beta", lambdas::get_beta, lambdas::set_beta)
@@ -1026,7 +1058,9 @@ namespace tensorrt
             .def("set_quantization_static", &IMoELayer::setQuantizationStatic, "fc_down_activation_scale"_a, "data_type"_a, IMoELayerDoc::set_quantization_static)
             .def("set_quantization_dynamic_dbl_q", &IMoELayer::setQuantizationDynamicDblQ, "fc_down_activation_dbl_q_scale"_a, "data_type"_a, "block_shape"_a, "dyn_q_output_scale_type"_a, IMoELayerDoc::set_quantization_dynamic_dbl_q)
             .def_property("quantization_to_type", &IMoELayer::getQuantizationToType, &IMoELayer::setQuantizationToType)
-            .def_property("quantization_block_shape", &IMoELayer::getQuantizationBlockShape, &IMoELayer::setQuantizationBlockShape)
+            .def_property("quantization_block_shape",
+                utils::throwingDimsGetter(&IMoELayer::getQuantizationBlockShape, "quantization_block_shape"),
+                &IMoELayer::setQuantizationBlockShape)
             .def_property("dyn_q_output_scale_type", &IMoELayer::getDynQOutputScaleType, &IMoELayer::setDynQOutputScaleType)
             .def("set_swiglu_params", &IMoELayer::setSwigluParams, "limit"_a, "alpha"_a, "beta"_a, IMoELayerDoc::set_swiglu_params)
             .def_property("swiglu_param_limit", &IMoELayer::getSwigluParamLimit, &IMoELayer::setSwigluParamLimit)

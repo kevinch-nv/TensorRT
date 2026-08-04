@@ -551,6 +551,7 @@ int32_t runOnceBuildAndInfer(
         new BuildEnvironment(options.build.safe, options.build.versionCompatible, options.system.DLACore,
             options.build.tempdir, options.build.tempfileControls, options.build.leanDLLPath, sampleTest.getCmdline()));
 
+
     bool buildPass
         = getEngineBuildEnv(options.model, options.build, options.system, *bEnv, sample::gLogError, postConfigHook);
 

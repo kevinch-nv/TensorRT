@@ -67,7 +67,7 @@ public:
             const auto& kernelMeta = mKernelMeta[i];
             const auto kernelKey = hashID(kernelMeta);
             if (kernelMeta.mSM == smVersion && kernelMeta.mDataType == mDataType
-                && mFunctions.find(kernelKey) == mFunctions.end())
+                && !mFunctions.contains(kernelKey))
             {
                 const uint32_t DEFAULT_SMEM_SIZE{48 * 1024};
                 if (kernelMeta.mSharedMemBytes >= DEFAULT_SMEM_SIZE)
@@ -114,7 +114,7 @@ public:
                 uint64_t const s = kernelMeta.mS;
                 uint64_t const headSize = kernelMeta.mD;
                 uint64_t key = (headSize << 32 | s);
-                if (mValidSequences.find(key) == mValidSequences.end())
+                if (!mValidSequences.contains(key))
                 {
                     mValidSequences.insert(key);
                 }
@@ -149,7 +149,7 @@ public:
     bool isValid(int32_t headSize, int32_t s) const
     {
         uint64_t key = (static_cast<uint64_t>(headSize) << 32 | static_cast<uint64_t>(s));
-        return (mValidSequences.find(key) != mValidSequences.end());
+        return (mValidSequences.contains(key));
     }
 
     virtual void run(TKernelParam& params, cudaStream_t ss) const

@@ -30,6 +30,8 @@ set(PLUGIN_COMMON_SOURCES
     cudaDriverWrapper.h
     cudnnWrapper.cpp
     cudnnWrapper.h
+    cufftWrapper.cpp
+    cufftWrapper.h
     dimsHelpers.h
     half.h
     mrcnn_config.h

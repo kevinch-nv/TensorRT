@@ -56,13 +56,13 @@ trtexec_safe [-h or --help]
 The following resources provide more details about `trtexec_safe`:
 
 **Documentation**
-- [TensorRT trtexec](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#trtexec)
-- [TensorRT Sample Support Guide](https://docs.nvidia.com/deeplearning/tensorrt/sample-support-guide/index.html)
-- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/index.html)
+- [TensorRT trtexec](https://docs.nvidia.com/deeplearning/tensorrt/latest/performance/benchmarking.html#trtexec)
+- [TensorRT Sample Support Guide](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [NVIDIA’s TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 
 # License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/sla/index.html)
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html)
 documentation.
 
 # Changelog

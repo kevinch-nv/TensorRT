@@ -25,6 +25,7 @@
 #include "efficientNMSPlugin/efficientNMSPlugin.h"
 #include "efficientNMSPlugin/tftrt/efficientNMSExplicitTFTRTPlugin.h"
 #include "efficientNMSPlugin/tftrt/efficientNMSImplicitTFTRTPlugin.h"
+#include "fftPlugin/fftPlugin.h"
 #include "flattenConcat/flattenConcat.h"
 #include "generateDetectionPlugin/generateDetectionPlugin.h"
 #include "gridAnchorPlugin/gridAnchorPlugin.h"
@@ -101,7 +102,7 @@ public:
             + "::" + std::string{pluginCreator->getPluginName()} + " version "
             + std::string{pluginCreator->getPluginVersion()};
 
-        if (mRegistryList.find(pluginType) == mRegistryList.end())
+        if (!mRegistryList.contains(pluginType))
         {
             bool status = getPluginRegistry()->registerCreator(*pluginCreator, libNamespace);
             if (status)
@@ -181,6 +182,7 @@ extern "C"
         initializePlugin<nvinfer1::plugin::EfficientNMSExplicitTFTRTPluginCreator>(logger, libNamespace);
         initializePlugin<nvinfer1::plugin::EfficientNMSImplicitTFTRTPluginCreator>(logger, libNamespace);
         initializePlugin<nvinfer1::plugin::EfficientNMSPluginCreator>(logger, libNamespace);
+        initializePlugin<nvinfer1::plugin::FFTPluginCreator>(logger, libNamespace);
         initializePlugin<nvinfer1::plugin::FlattenConcatPluginCreator>(logger, libNamespace);
         initializePlugin<nvinfer1::plugin::GenerateDetectionPluginCreator>(logger, libNamespace);
         initializePlugin<nvinfer1::plugin::GridAnchorPluginCreator>(logger, libNamespace);

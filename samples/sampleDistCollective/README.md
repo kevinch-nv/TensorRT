@@ -32,7 +32,7 @@ Specifically:
 
 ### TensorRT API layers and ops
 
-In this sample, the [IDistCollectiveLayer](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#layers) is used for distributed collective operations across multiple GPUs. For more information, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#layers) documentation.
+In this sample, the [IDistCollectiveLayer](https://docs.nvidia.com/deeplearning/tensorrt/latest/_static/c-api/classnvinfer1_1_1_i_dist_collective_layer.html) is used for distributed collective operations across multiple GPUs. For more information, see the [TensorRT Developer Guide: Layers](https://docs.nvidia.com/deeplearning/tensorrt/latest/api/operators.html) documentation.
 
 ## Prerequisites
 
@@ -111,14 +111,14 @@ To see the full list of available options and their descriptions, use the `-h` o
 The following resources provide a deeper understanding about distributed computing with TensorRT:
 
 **Documentation**
-- [Introduction To NVIDIA's TensorRT Samples](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sample-support-guide/index.html#samples)
-- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/sdk/tensorrt-developer-guide/index.html#c_topics)
-- [NVIDIA's TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/index.html)
+- [Introduction To NVIDIA's TensorRT Samples](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/sample-support-guide.html)
+- [Working With TensorRT Using The C++ API](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/c-api-docs.html)
+- [NVIDIA's TensorRT Documentation Library](https://docs.nvidia.com/deeplearning/tensorrt/latest/index.html)
 - [NVIDIA NCCL Documentation](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/index.html)
 
 ## License
 
-For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/sdk/tensorrt-sla/index.html) documentation.
+For terms and conditions for use, reproduction, and distribution, see the [TensorRT Software License Agreement](https://docs.nvidia.com/deeplearning/tensorrt/latest/reference/sla.html) documentation.
 
 
 ## Changelog

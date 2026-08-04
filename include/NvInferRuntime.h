@@ -3185,6 +3185,7 @@ public:
         return mImpl->createRuntimeConfig();
     }
 
+
     //!
     //! \brief Return the maximum device memory required by the context over all profiles.
     //!

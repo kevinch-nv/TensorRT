@@ -19,10 +19,6 @@ cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
 
 project(TRTPyBinds LANGUAGES CXX)
 
-option(TRT_BUILD_ENABLE_NEW_PYTHON_FLOW "Use new build logic based on the main CMake build." OFF)
-
-if (${TRT_BUILD_ENABLE_NEW_PYTHON_FLOW})
-
 if(MSVC)
     set(DEFAULT_PY_EXT_PATH "${TOOLS_BASE}/win32")
 else()
@@ -37,7 +33,7 @@ set(TRT_BUILD_PYTHON_PY_VERSIONS ${BUILD_PYTHON_PY_VERSIONS} CACHE STRING "The l
 
 message(STATUS "TRT_BUILD_PYTHON_PY_VERSIONS: ${TRT_BUILD_PYTHON_PY_VERSIONS}")
 
-if(NOT ${TRT_BUILD_WINML})
+if(NOT ${TRT_PRODUCT_IS_RTX})
     set(TRT_PYTHON_MODULE_NAMES
         "tensorrt"
         "tensorrt_lean"
@@ -140,9 +136,13 @@ function(createBindingLibrary moduleName pyVersion)
         message(FATAL_ERROR "The current platform \"${TRT_BUILD_PLATFORM}\" cannot be used to build the TRT Python Bindings.")
     endif()
 
+    # Also accepts the Debian multiarch layout where pyconfig.h sits one level up.
     find_path(
         PYCONFIG_INCLUDE pyconfig.h
-        HINTS ${PYTHON_INCLUDES}/${PYCONFIG_H_PATH}
+        HINTS
+            ${PYTHON_INCLUDES}/${PYCONFIG_H_PATH}
+            ${PYTHON_INCLUDES}/../${PYCONFIG_H_PATH}
+            ${PYTHON_INCLUDES}
         NO_CACHE
         REQUIRED
         NO_CMAKE_FIND_ROOT_PATH
@@ -164,6 +164,10 @@ function(createBindingLibrary moduleName pyVersion)
         set(TRT_LIBS tensorrt nvonnxparser)
         if(${TRT_BUILD_PLUGINS})
             list(APPEND TRT_LIBS tensorrt_plugins)
+        elseif(TARGET nvinfer_plugin)
+            # Plugins aren't built in this graph (e.g. OSS BUILD_PLUGINS=OFF); link
+            # the prebuilt nvinfer_plugin so the bindings resolve plugin symbols.
+            list(APPEND TRT_LIBS nvinfer_plugin)
         endif()
     elseif(${moduleName} STREQUAL "tensorrt_rtx")
         set(TRT_LIBS tensorrt nvonnxparser)
@@ -198,6 +202,11 @@ function(createBindingLibrary moduleName pyVersion)
 
     add_dependencies(tensorrt_python_bindings ${libName})
 
+    # LLD can't link GCC LTO objects, so link the Python bindings with BFD instead.
+    if(CMAKE_INTERPROCEDURAL_OPTIMIZATION AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set_target_properties(${libName} PROPERTIES LINKER_TYPE BFD)
+    endif()
+
     if(MSVC)
         # Prevent pybind11 from sharing resources with other, potentially ABI incompatible modules
         # https://github.com/pybind/pybind11/issues/2898
@@ -208,10 +217,12 @@ function(createBindingLibrary moduleName pyVersion)
 
         if(NOT TARGET python${pyVerStr})
             # Windows needs an explicit link against the python library.
+            # Standard CPython installs put the import lib under `libs/`; the bundled
+            # tools-base layout uses `lib/`. Search both.
             find_library(
                 PYTHON${pyVerStr}_LIBRARY_PATH python${pyVerStr}.lib
                 HINTS ${TRT_BUILD_PYTHON_EXTERNALS_PATH}/python${pyVersion}
-                PATH_SUFFIXES lib
+                PATH_SUFFIXES libs lib
                 REQUIRED
                 NO_CMAKE_FIND_ROOT_PATH
             )
@@ -233,230 +244,3 @@ endforeach()
 
 # Enter the packaging subdir to actually build the wheels.
 add_subdirectory(packaging)
-
-else() # TRT_BUILD_ENABLE_NEW_PYTHON_FLOW - old flow is below this line
-
-set(TRT_BUILD_WINML OFF)
-if (${TENSORRT_MODULE} STREQUAL "tensorrt_rtx")
-    # The "old" flow doesn't already have TRT_BUILD_WINML set, because it's
-    # coming from the legacy make build. So if we get the tensorrt_rtx module,
-    # we assume we're in the TensorRT-RTX build.
-    set(TRT_BUILD_WINML ON)
-endif()
-
-# Ensure TRT_WINML is either 0 or 1
-if (NOT TRT_WINML)
-    set(TRT_WINML 0)
-    if (TRT_BUILD_WINML)
-        set(TRT_WINML 1)
-    endif()
-endif()
-
-# Sets variable to a value if variable is unset.
-macro(set_ifndef var val)
-    if(NOT DEFINED ${var})
-        set(${var} ${val})
-    endif()
-endmacro()
-
-function(message)
-    if(VERBOSE)
-        _message(${ARGN})
-    endif()
-endfunction()
-
-# -------- CMAKE OPTIONS --------
-
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${TENSORRT_MODULE}/)
-set(CPP_STANDARD
-    17
-    CACHE STRING "CPP Standard Version")
-set(CMAKE_CXX_STANDARD ${CPP_STANDARD})
-
-# -------- PATHS --------
-find_package(CUDAToolkit REQUIRED)
-message(STATUS "EXT_PATH: ${EXT_PATH}")
-message(STATUS "TENSORRT_BUILD: ${TENSORRT_BUILD}")
-message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
-message(STATUS "CUDAToolkit_LIBRARY_ROOT: ${CUDAToolkit_LIBRARY_ROOT}")
-message(STATUS "CUDAToolkit_INCLUDE_DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-
-set_ifndef(TENSORRT_ROOT ../)
-message(STATUS "TENSORRT_ROOT: ${TENSORRT_ROOT}")
-
-set_ifndef(WIN_EXTERNALS ${EXT_PATH})
-message(STATUS "WIN_EXTERNALS: ${WIN_EXTERNALS}")
-
-# Convert to an absolute path.
-set_ifndef(ONNX_INC_DIR ${TENSORRT_ROOT}/parsers/onnx)
-find_path(
-    PYBIND11_DIR pybind11/pybind11.h
-    HINTS ${EXT_PATH} ${WIN_EXTERNALS}
-    PATH_SUFFIXES pybind11/include
-    REQUIRED
-)
-
-message(STATUS "ONNX_INC_DIR: ${ONNX_INC_DIR}")
-message(STATUS "PYBIND11_DIR: ${PYBIND11_DIR}")
-
-# Source Files
-if(${TENSORRT_MODULE} STREQUAL "tensorrt" OR ${TENSORRT_MODULE} STREQUAL "tensorrt_rtx")
-    # tensorrt full dependencies
-    file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
-    set(_NEED_EXPORTS_DEF ON)
-else()
-    # tensorrt_lean and tensorrt_dispatch dependencies
-    set(SOURCE_FILES src/pyTensorRT.cpp src/utils.cpp src/infer/pyCore.cpp src/infer/pyPlugin.cpp
-                     src/infer/pyFoundationalTypes.cpp)
-endif()
-
-set(PYTHON python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION})
-set(PYTHON_LIB_NAME python${PYTHON_MAJOR_VERSION}${PYTHON_MINOR_VERSION})
-message(STATUS "PYTHON: ${PYTHON}")
-message(STATUS "TENSORRT_MODULE: ${TENSORRT_MODULE}")
-
-set(PY_MODULE_NAME ${TENSORRT_MODULE})
-
-# Find headers
-set(LIBPATH_SUFFIX lib)
-if(MSVC)
-    find_path(
-        PY_INCLUDE Python.h
-        HINTS ${WIN_EXTERNALS}/${PYTHON} ${EXT_PATH}/${PYTHON}
-        PATH_SUFFIXES include
-        REQUIRED
-    )
-    find_path(
-        PY_LIB_DIR ${PYTHON_LIB_NAME}.lib
-        HINTS ${WIN_EXTERNALS}/${PYTHON} ${EXT_PATH}/${PYTHON}
-        PATH_SUFFIXES ${LIBPATH_SUFFIX}
-        REQUIRED
-    )
-    message(STATUS "PY_LIB_DIR: ${PY_LIB_DIR}")
-else()
-    find_path(
-        PY_INCLUDE Python.h
-        HINTS ${EXT_PATH}/${PYTHON} /usr/include/${PYTHON}
-        PATH_SUFFIXES include
-        REQUIRED
-    )
-endif()
-
-message(STATUS "PY_INCLUDE: ${PY_INCLUDE}")
-
-if(MSVC)
-    set(PY_TARGET_DIR win)
-else()
-    set(PY_TARGET_DIR ${TARGET}-linux-gnu)
-    if(${TARGET} STREQUAL ppc64le)
-        set(PY_TARGET_DIR powerpc64le-linux-gnu)
-    endif()
-endif()
-
-# The per-platform pyconfig.h is located at /externals/python<ver>/<triple>/python<ver>/.
-# Not sure why it's setup that way.
-find_path(
-    PY_CONFIG_INCLUDE pyconfig.h
-    HINTS ${PY_INCLUDE}
-    PATH_SUFFIXES ${PY_TARGET_DIR}/${PYTHON} ${PY_TARGET_DIR}/${PYTHON}m
-    REQUIRED
-)
-message(STATUS "PY_CONFIG_INCLUDE: ${PY_CONFIG_INCLUDE}")
-
-# -------- GLOBAL COMPILE OPTIONS --------
-
-include_directories(${TENSORRT_ROOT}/include ${PROJECT_SOURCE_DIR}/include ${CUDAToolkit_INCLUDE_DIRS}
-                    ${PROJECT_SOURCE_DIR}/docstrings ${ONNX_INC_DIR} ${PYBIND11_DIR})
-link_directories(${TENSORRT_BUILD} ${TENSORRT_LIBPATH})
-
-if(MSVC)
-    # Prevent pybind11 from sharing resources with other, potentially ABI incompatible modules
-    # https://github.com/pybind/pybind11/issues/2898
-    add_definitions(-DPYBIND11_COMPILER_TYPE="_${PROJECT_NAME}_abi")
-endif()
-
-if(MSVC)
-    include_directories(SYSTEM BEFORE ${ADDITIONAL_PLATFORM_INCLUDE_DIRS})
-    link_libraries(${ADDITIONAL_PLATFORM_LIB_FLAGS})
-    link_directories(${PY_LIB_DIR})
-
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
-    if(${NV_GEN_PDB})
-        # PDB is only useful in release mode.
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi /bigobj")
-        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
-    endif()
-else()
-    set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} ${GLIBCXX_USE_CXX11_ABI_FLAG} -fvisibility=hidden -std=c++${CPP_STANDARD} -Wno-deprecated-declarations"
-    )
-endif()
-
-
-# ---------- MODULE DEPENDENCIES ----------
-add_compile_definitions(TENSORRT_MODULE=${TENSORRT_MODULE})
-
-if("${TRT_VCAST}" STREQUAL "1" OR "${TRT_VCAST_SAFE}" STREQUAL "1")
-    set(vfc_suffix "_static")
-else()
-    set(vfc_suffix "")
-endif()
-
-
-if(MSVC)
-    set(nvinfer_lib_name "${TRT_NVINFER_NAME}_${TENSORRT_MAJOR_VERSION}${TRT_LIB_SUFFIX}")
-    set(nvinfer_plugin_lib_name "nvinfer_plugin_${TENSORRT_MAJOR_VERSION}")
-    set(nvonnxparser_lib_name "${TRT_ONNXPARSER_NAME}_${TENSORRT_MAJOR_VERSION}${TRT_LIB_SUFFIX}")
-    set(nvinfer_lean_lib_name "nvinfer_lean_${TENSORRT_MAJOR_VERSION}${vfc_suffix}")
-    set(nvinfer_dispatch_lib_name "nvinfer_dispatch_${TENSORRT_MAJOR_VERSION}${vfc_suffix}")
-else()
-    if(${TRT_BUILD_WINML})
-        set(nvinfer_lib_name "-l:lib${TRT_NVINFER_NAME}.so")
-    else()
-        set(nvinfer_lib_name "${TRT_NVINFER_NAME}")
-    endif()
-    set(nvinfer_plugin_lib_name "nvinfer_plugin")
-    set(nvonnxparser_lib_name "${TRT_ONNXPARSER_NAME}")
-    set(nvinfer_lean_lib_name "nvinfer_lean${vfc_suffix}")
-    set(nvinfer_dispatch_lib_name "nvinfer_dispatch${vfc_suffix}")
-endif()
-message(STATUS "NVInferLib = ${nvinfer_lib_name}")
-message(STATUS "NVOnnxParserLib = ${nvonnx_parser_lib_name}")
-
-if(${TENSORRT_MODULE} STREQUAL "tensorrt" OR ${TENSORRT_MODULE} STREQUAL "tensorrt_rtx")
-    set(TRT_LIBS ${nvinfer_lib_name} ${nvonnxparser_lib_name})
-        list(APPEND TRT_LIBS ${nvinfer_plugin_lib_name})
-elseif(${TENSORRT_MODULE} STREQUAL "tensorrt_lean")
-    set(TRT_LIBS ${nvinfer_lean_lib_name})
-elseif(${TENSORRT_MODULE} STREQUAL "tensorrt_dispatch")
-    set(TRT_LIBS ${nvinfer_dispatch_lib_name})
-else()
-    message(FATAL_ERROR "Unknown TensorRT module " ${TENSORRT_MODULE})
-endif()
-
-# -------- BUILDING --------
-set(LIB_NAME ${PY_MODULE_NAME})
-
-# Set up target
-add_library(${LIB_NAME} SHARED ${SOURCE_FILES})
-if(_NEED_EXPORTS_DEF)
-    target_compile_definitions(${LIB_NAME} PRIVATE
-        tensorrt_EXPORTS=1
-    )
-endif()
-message(STATUS "Python library name ${LIB_NAME}")
-target_include_directories(${LIB_NAME} BEFORE PUBLIC ${PY_CONFIG_INCLUDE} ${PY_INCLUDE})
-if(MSVC)
-    # For some reason, we must explicitly link against the Python library on Windows.
-    message(STATUS "Dependencies ${TRT_LIBS} ${PYTHON_LIB_NAME}")
-    target_link_libraries(${LIB_NAME} PRIVATE ${TRT_LIBS} ${PYTHON_LIB_NAME})
-else()
-    message(STATUS "Dependencies ${TRT_LIBS} ")
-    target_link_libraries(${LIB_NAME} PRIVATE ${TRT_LIBS})
-endif()
-
-# Note that we have to remove the `lib` prefix from the binding .so's
-set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
-
-endif()

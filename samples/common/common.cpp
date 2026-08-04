@@ -30,7 +30,7 @@ std::optional<std::string_view> matchFlag(std::string_view arg, std::string_view
         return std::nullopt;
     }
     arg.remove_prefix(start);
-    if (startsWith(arg, flag))
+    if (arg.starts_with(flag))
     {
         return arg.substr(flag.size());
     }
